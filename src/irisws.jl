@@ -21,6 +21,111 @@ const IRISTimeSeries_PROCESSING_FIELDS = Dict(
     :int => Bool,
     :decimate => Real)
 
+const IRISTimeSeries_OUTPUT_TYPES = ("ascii", "ascii2", "ascii", "geocsv", "geocsv.tspair",
+    "geocsv.slist", "audio", "miniseed", "plot", "saca", "sacbb", "sacbl")
+
+"""
+    IRISTimeSeries
+
+Create an data query which can be sent to a datacentre which implements the IRIS
+Web Services timeseries specification.
+
+## Available options
+
+### Channel Options (required)
+The four SCNL parameters (Station – Channel – Network – Location) are used to determine
+the channel of interest, and are all required. Wildcards are not accepted.
+
+- `network`: Seismic network name
+- `station`: Station name
+- `location`: Location code. Use `loc=--` for empty location codes
+- `channel`: Channel Code
+
+### Date-Range Options (required)
+Time ranges must be defined by specifying a start time with either an end time or a duration
+in seconds.
+
+For example, the following two time specifications are valid, and are equivalent.
+
+#### Examples
+
+    IRISTimeSeries([SCNL]..., starttime=Dates.DateTime(2005, 02, 23, 12), endtime=Dates.DateTime(2005, 02, 23, 12, 05))
+    IRISTimeSeries([SCNL]..., starttime=Dates.DateTime("2005-02-23T12:00:00"), duration=300)
+
+- `starttime`: Start time
+- `endtime`: End time
+- `duration`: Duration of requested data, in seconds
+
+### Time Series Processing Options
+The following parameters act as filters upon the timeseries. Parameter order matters
+because each filter operation is performed in the order given.
+
+#### Examples
+
+    IRISTimeSeries(..., demean=true, lpfilter=2.0) # will demean and then apply a low-pass filter
+    IRISTimeSeries(..., lpfilter=2.0, demean=true) # will apply a low-pass filter, and then demean
+
+- `taper`: Apply a time domain symmetric tapering function to the timeseries data. The
+  width is specified as a fraction of the trace length from 0 to 0.5.
+- `taper_type`: Form of taper to apply.  Supported types: HANNING (default), HAMMING, COSINE
+- `envelope`: Calculate the envelope of the time series. This calculation uses a Hilbert
+  transform approximated by a time domain filter
+- `lpfilter`: Low-pass filter the time-series using an IIR 4th order filter, using this value
+  (in Hertz) as the cutoff
+- `hpfilter`: High-pass filter the time-series using an IIR 4th order filter, using this value
+  (in Hertz) as the cutoff
+- `bpfilter`: Band pass frequencies, in Hz. (See NOTE on variable separators1)
+- `demean`: Remove mean value from data. true or false (default false).
+- `scale`: Scale data samples by specified factor. When scale=AUTO scales by the stage-zero gain
+- `divscale`: Scale data samples by the inverse of the specified factor
+- `correct`: Apply instrument correction to convert to earth units. true or false. Uses
+  either deconvolution3,4 or polynomial response correction. true or false (default false)
+- `freqlimits`: Specify an envelope for a spectrum taper for deconvolution. Frequencies are
+  specified in Hertz. This cosine taper scales the spectrum from 0 to 1 between f1 and f2 and
+  from 1 to 0 between f3 and f4. Can only be used with the correct option. Cannot be used in
+  combination with the autolimits option.
+- `autolimits`: Automatically determine frequency limits for deconvolution. A pass band is
+  determined for all frequencies with the lower and upper corner cutoffs defined in terms of
+  dB down from the maximum amplitude. This algorithm is designed to work with flat responses,
+  i.e. a response in velocity for an instrument which is flat to velocity. Other combinations
+  will likely result in unsatisfactory results. Cannot be used in combination with the
+  freqlimits option.
+- `units`: Specify output units. Can be DIS, VEL, ACC or DEF, where DEF results in no unit
+  conversion.  `units` can only be used with `correct`.
+- `diff`: Differentiate using 2 point (uncentered) method. true or false (default false)
+- `int`: Integrate using trapezoidal (midpoint) method. true or false (default false)
+- `decimate`: Sample-rate to decimate to. See Help for more details. A linear-phase,
+  anti-alias filter is applied during decimation.
+
+### Plot Options
+- `antialias`: If true, the created image will have anti-aliasing used. Can only be specified
+  with the `output=plot` option
+- `width`: Width of the output plot (pixels). Can only be specified with the `output=plot` option
+- `height`: Height of the output plot (pixels). Can only be specified with the `output=plot` option
+
+### Audio Options
+- `audiosamplerate`: The sample rate of the output wav file in Hz. Defaults to 16000.
+  Can only be specified with the output=audio option
+- `audiocompress`: Apply dynamic range compression to waveform data. This makes more of the
+  signal audible. Can only be specified with the output=audio option
+
+## Output options
+
+|Value|Description|
+|:----|:----------|
+|`ascii1`|ASCII data format, 1 column (values)|
+|`ascii2`|ASCII data format, 2 columns (time, value)|
+|`ascii`|Same as `ascii2`|
+|`geocsv`, `geocsv.tspair`|ASCII GeoCSV data format, 2 column (time, values)|
+|`geocsv.slist`|ASCII geocsv data format, 1 columns (value)|
+|`audio`|Audio WAV file|
+|`miniseed`|FDSN miniSEED format|
+|`plot`|A simple plot of the timeseries in PNG format|
+|`saca`|SAC – ASCII format|
+|`sacbb`|SAC – binary big-endian format|
+|`sacbl`|SAC – binary little-endian format|
+
+"""
 struct IRISTimeSeries <: IRISRequest
     network::String
     station::String
@@ -80,9 +185,14 @@ struct IRISTimeSeries <: IRISRequest
         haskey(process, :autolimits) && haskey(process, :freqlimits) &&
             throw(ArgumentError("Cannot specify both `autolimits` and `freqlimits`"))
         
+        # Disallowed combinations
         coalesce(audiocompress, false) || !ismissing(audiosamplerate) && output != "audio" &&
             throw(ArgumentError("Cannot specify `audiocompress` if `output` is not \"audio\""))
         
+        # Disallowed values
+        output in IRISTimeSeries_OUTPUT_TYPES ||
+            throw(ArgumentError("`output` must be one of $(IRISTimeSeries_OUTPUT_TYPES)"))
+
         new(network, station, location, channel, starttime, endtime, duration,
             antialias, width, height, audiosamplerate, audiocompress, output, process)
     end
@@ -93,9 +203,11 @@ function IRISTimeSeries(;
                         starttime=missing, endtime=missing, duration=missing, antialias=missing,
                         width=missing, height=missing, audiosamplerate=missing,
                         audiocompress=missing, output=missing, kwargs...)
-    any(ismissing, (network, station, location, channel, starttime, endtime, output)) &&
-        throw(ArgumentError("network, station, location, channel, starttime, endtime " *
+    any(ismissing, (network, station, location, channel, starttime, output)) &&
+        throw(ArgumentError("network, station, location, channel, starttime " *
                             "and output must all be specified"))
+    all(ismissing, (endtime, duration)) &&
+        throw(ArgumentError("One of `endtime` or `duration` must be specified"))
     process = OrderedDict{Symbol,Any}()
     for (k, v) in kwargs
         k in keys(IRISTimeSeries_PROCESSING_FIELDS) ||
@@ -103,7 +215,7 @@ function IRISTimeSeries(;
         process[k] = v
     end
     IRISTimeSeries(network, station, location, channel, starttime, endtime, duration,
-                   antialias, width, height, audiosamplerate, audiocompress, output,
+                   antialias, width, height, audiosamplerate, audiocompress, lowercase(output),
                    process)
 end
 
