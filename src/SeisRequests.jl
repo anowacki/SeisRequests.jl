@@ -28,14 +28,15 @@ export
     get_request,
     server_list
 
+using Compat
+using Compat.Dates
+@static if VERSION < v"0.7-"
+    using Missings
+end
+
 using HTTP
-using Missings
 using Parameters
-
 import DataStructures: OrderedDict
-
-"Default version of web services to use"
-const DEFAULT_VERSION = 1
 
 const SERVERS = Dict{String,String}()
 SERVERS["IRIS"] = "http://service.iris.edu"
@@ -71,18 +72,16 @@ const MString = Union{Missing,String}
 
 An abstract type representing any kind of web request for seismic data.
 
-To implement a `SeisRequest`, subtypes must have the following methods:
-- `version_string`
-- 
-
 Current subtypes of `SeisRequest`:
 - `FDSNRequest`
+- `IRISRequest`
 """
 abstract type SeisRequest end
 
 include("fdsnws.jl")
 include("irisws.jl")
 
+"""Default version string for all requests."""
 version_string(::SeisRequest) = "1"
 
 """
@@ -145,7 +144,7 @@ function get_request(r::SeisRequest; server=DEFAULT_SERVER, verbose=true)
     response = HTTP.request("GET", uri)
     status_text = STATUS_CODES[response.status]
     if verbose
-        info("Request status: " * status_text)
+        @info("Request status: " * status_text)
     else
         response.status in CODES_FAILURE && warn("Request status: " * status_text)
     end 
