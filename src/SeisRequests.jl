@@ -30,6 +30,7 @@ export
 
 using Compat
 using Compat.Dates
+import Compat: @info
 @static if VERSION < v"0.7-"
     using Missings
 end
