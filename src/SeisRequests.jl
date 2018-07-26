@@ -6,7 +6,9 @@ __precompile__()
 Basic implementation of seismic web requests, returning only the raw results
 of a request.
 
-This module implements (so far) only the FDSN Web Services specification.
+Currently implemented schemes are the FDSN Web Services specification, and IRIS's
+web services specification for data (timeseries).  Further specifications will
+be added in the future.
 
 To request data, create a one of the [FDSNRequest](@ref) types and use the
 [get_request](@ref) method on it.  This method returns a `HTTP.Message.Response`
@@ -16,6 +18,9 @@ containing the raw response in the field `body`.
 
 FDSN Web Services request specification:
     http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
+
+Details on IRISWS timeseries can be found at:
+    https://service.iris.edu/irisws/timeseries/1/
 """
 module SeisRequests
 
