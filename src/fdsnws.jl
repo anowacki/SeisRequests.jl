@@ -91,7 +91,7 @@ the FDSN Web Services specification.
         -90 ≤ coalesce(minlat, -90) ≤ 90 || throw(ArgumentError("`minlatitude` must be in range -90 to 90"))
         -90 ≤ coalesce(maxlat, 90) ≤ 90 || throw(ArgumentError("`maxlatitude` must be in range -90 to 90"))
         -180 ≤ coalesce(minlon, -180) ≤ 180 || throw(ArgumentError("`minlongitude` must be in range -180 to 180"))
-        -180 ≤ coalesce(minlon, 180) ≤ 180 || throw(ArgumentError("`maxlongitude` must be in range -180 to 180"))
+        -180 ≤ coalesce(maxlon, 180) ≤ 180 || throw(ArgumentError("`maxlongitude` must be in range -180 to 180"))
         -90 ≤ coalesce(lat, 0) ≤ 90 || throw(ArgumentError("`latitude` must be in range -90 to 90"))
         -180 ≤ coalesce(lon, 0) ≤ 180 || throw(ArgumentError("`longitude` must be in range -180 to 180"))
         0 ≤ coalesce(minr, 0) ≤ 180 || throw(ArgumentError("`minradius` must be in range 0 to 180"))
@@ -151,7 +151,7 @@ julia> FDSNDataSelect(station="ANMO", starttime=)
         !ismissing(net) && !isascii(net) && throw(ArgumentError("`network` must be ASCII"))
         !ismissing(sta) && !isascii(sta) && throw(ArgumentError("`station` must be ASCII"))
         if !ismissing(loc)
-            !isascii(loc) && throw(ArgumentError("`channel` must be ASCII"))
+            !isascii(loc) && throw(ArgumentError("`location` must be ASCII"))
             loc == "  " && (loc = "--")
         end
         !ismissing(cha) && !isascii(cha) && throw(ArgumentError("`channel` must be ASCII"))
@@ -241,10 +241,13 @@ the FDSN Web Services specification.
             loc == "  " && (loc = "--")
         end
         !ismissing(cha) && !isascii(cha) && throw(ArgumentError("`channel` must be ASCII"))
+        (!ismissing(minr) || !ismissing(maxr)) && (ismissing(lat) || ismissing(lon)) &&
+            throw(ArgumentError("Both `latitude` and `longitude` must be present if " *
+                                "specifying `minradius` or `maxradius`"))
         -90 ≤ coalesce(minlat, -90) ≤ 90 || throw(ArgumentError("`minlatitude` must be in range -90 to 90"))
         -90 ≤ coalesce(maxlat, 90) ≤ 90 || throw(ArgumentError("`maxlatitude` must be in range -90 to 90"))
         -180 ≤ coalesce(minlon, -180) ≤ 180 || throw(ArgumentError("`minlongitude` must be in range -180 to 180"))
-        -180 ≤ coalesce(minlon, 180) ≤ 180 || throw(ArgumentError("`maxlongitude` must be in range -180 to 180"))
+        -180 ≤ coalesce(maxlon, 180) ≤ 180 || throw(ArgumentError("`maxlongitude` must be in range -180 to 180"))
         -90 ≤ coalesce(lat, 0) ≤ 90 || throw(ArgumentError("`latitude` must be in range -90 to 90"))
         -180 ≤ coalesce(lon, 0) ≤ 180 || throw(ArgumentError("`longitude` must be in range -180 to 180"))
         0 ≤ coalesce(minr, 0) ≤ 180 || throw(ArgumentError("`minradius` must be in range 0 to 180"))
