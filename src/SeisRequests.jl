@@ -44,25 +44,27 @@ using HTTP
 using Parameters
 import DataStructures: OrderedDict
 
-const SERVERS = Dict{String,String}()
-SERVERS["IRIS"] = "http://service.iris.edu"
-SERVERS["INGV"] = "http://webservices.ingv.it"
-SERVERS["Orfeus"] = "http://www.orfeus-eu.org"
+
+"URIs of servers to which requests can be sent by key"
+const SERVERS = Dict{String,String}(
+    "IRIS" => "http://service.iris.edu",
+    "INGV" => "http://webservices.ingv.it",
+    "Orfeus" => "http://www.orfeus-eu.org")
 
 const DEFAULT_SERVER = "IRIS"
 
 "Dict describing the common HTTP status codes returned by FDSN services"
-const STATUS_CODES = Dict{Int,String}()
-STATUS_CODES[200] = "Successful request, results follow"
-STATUS_CODES[204] = "Request was properly formatted and submitted but no data matches the selection"
-STATUS_CODES[400] = "Bad request due to improper specification, unrecognized parameter, parameter value out of range, etc."
-STATUS_CODES[401] = "Unauthorized, authentication required"
-STATUS_CODES[403] = "Authentication failed or access blocked to restricted data"
-STATUS_CODES[404] = "Alternate to 204 (set via the ‘nodata’ parameter), normally used for results returned to a web browser."
-STATUS_CODES[413] = "Request would result in too much data being returned or the request itself is too large, returned error message should include the service limitations in the detailed description. Service limits should also be documented in the service WADL."
-STATUS_CODES[414] = "Request URI too large"
-STATUS_CODES[500] = "Internal server error"
-STATUS_CODES[503] = "Service temporarily unavailable, used in maintenance and error conditions"
+const STATUS_CODES = Dict{Int,String}(
+    200 => "Successful request, results follow",
+    204 => "Request was properly formatted and submitted but no data matches the selection",
+    400 => "Bad request due to improper specification, unrecognized parameter, parameter value out of range, etc.",
+    401 => "Unauthorized, authentication required",
+    403 => "Authentication failed or access blocked to restricted data",
+    404 => "Alternate to 204 (set via the ‘nodata’ parameter), normally used for results returned to a web browser.",
+    413 => "Request would result in too much data being returned or the request itself is too large, returned error message should include the service limitations in the detailed description. Service limits should also be documented in the service WADL.",
+    414 => "Request URI too large",
+    500 => "Internal server error",
+    503 => "Service temporarily unavailable, used in maintenance and error conditions")
 const CODE_SUCCESS = 200
 const CODES_FAILURE = (400, 401, 403, 404, 413, 414, 500, 503)
 
