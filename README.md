@@ -53,7 +53,7 @@ the UK station in Jersey:
 ```julia
 julia> using SeisRequests
 
-julia> req = FDSNStation(station="JSA", network="GB", channel="?H?", level="channel, format="text")
+julia> req = FDSNStation(station="JSA", network="GB", channel="?H?", level="channel", format="text")
 FDSNStation
   starttime: Missing missing
   endtime: Missing missing
