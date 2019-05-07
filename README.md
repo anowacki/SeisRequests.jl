@@ -18,7 +18,7 @@ information amongst other things.
 
 ## Installing
 
-Add SeisRequests on v0.7 of Julia and upwards like so:
+Add SeisRequests on v1 of Julia and upwards like so:
 
 ```julia
 julia> ] # Type ']' to enter pkg mode
