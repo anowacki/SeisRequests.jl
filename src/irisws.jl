@@ -1,3 +1,11 @@
+"""
+    IRISRequest
+
+An abstract type representing requests conforming to the IRIS Web Services specification.
+
+Current subtypes of `IRISRequest`:
+- `IRISTimeSeries`
+"""
 abstract type IRISRequest <: SeisRequest end
 
 protocol_string(::IRISRequest) = "irisws"
