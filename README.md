@@ -21,11 +21,10 @@ information amongst other things.
 Add SeisRequests on v0.7 of Julia and upwards like so:
 
 ```julia
-julia> import Pkg; Pkg.add("https://github.com/anowacki/SeisRequests.jl")
-```
+julia> ] # Type ']' to enter pkg mode
 
-(On v0.6 and older, instead run
-`Pkg.clone("https://github.com/anowacki/SeisRequests.jl")`)
+pkg> add https://github.com/anowacki/SeisRequests.jl
+```
 
 ## Using
 

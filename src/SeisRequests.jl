@@ -1,5 +1,3 @@
-__precompile__()
-
 """
 # SeisRequests
 
@@ -33,12 +31,7 @@ export
     get_request,
     server_list
 
-using Compat
-using Compat.Dates
-import Compat: @info
-@static if VERSION < v"0.7-"
-    using Missings
-end
+using Dates
 
 using HTTP
 using Parameters

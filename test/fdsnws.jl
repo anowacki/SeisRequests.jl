@@ -1,10 +1,7 @@
 # FDSN web service specification tests
 
-using Compat.Test
-import Compat.Dates
-@static if VERSION < v"0.7"
-    using Missings
-end
+using Test
+import Dates
 using SeisRequests
 
 @testset "FDSNWS" begin

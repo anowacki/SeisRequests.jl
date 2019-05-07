@@ -1,0 +1,19 @@
+name = "SeisRequests"
+uuid = "37ba1d8a-44b2-5bbd-9814-465cdc1f4fb5"
+authors = ["Andy Nowacki <a.nowacki@leeds.ac.uk>"]
+version = "0.2.0"
+
+[deps]
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

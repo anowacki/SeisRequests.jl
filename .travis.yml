@@ -3,10 +3,11 @@ os:
   - osx
   - linux
 julia:
-  - 0.6
   - 0.7
   - 1.0
+  - 1.1
   - nightly
+
 notifications:
   email: false
 
@@ -14,5 +15,4 @@ matrix:
   allow_failures:
     - julia: nightly
 
-after_success:
-  - julia -e 'VERSION >= v"0.7" && import Pkg; cd(Pkg.dir("SeisRequests")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+coveralls: true
