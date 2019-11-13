@@ -40,8 +40,9 @@ import DataStructures: OrderedDict
 
 "URIs of servers to which requests can be sent by key"
 const SERVERS = Dict{String,String}(
-    "IRIS" => "http://service.iris.edu",
     "INGV" => "http://webservices.ingv.it",
+    "IRIS" => "http://service.iris.edu",
+    "ISC" => "http://www.isc.ac.uk",
     "Orfeus" => "http://www.orfeus-eu.org")
 
 const DEFAULT_SERVER = "IRIS"

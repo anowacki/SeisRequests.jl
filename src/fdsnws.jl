@@ -47,7 +47,7 @@ the FDSN Web Services specification.
 |`catalog`|Limit to events from a specified catalog|
 |`contributor`|Limit to events contributed by a specified contributor.|
 |`updatedafter`|Limit to events updated after the specified time.|
-|`format`|Specify format of result, either `"xml"` (default) or `"text"`. If this parameter is not specified the service must return QuakeML.|
+|`format`|Specify format of result, either `"xml"` (default) or `"text"` (`"isf"` from the ISC).  If this parameter is not specified the service must return QuakeML.|
 |`nodata`|Select status code for “no data”, either `204` (default) or `404`.|"""
 @with_kw struct FDSNEvent <: FDSNRequest
     starttime::MDateTime = missing
@@ -96,13 +96,13 @@ the FDSN Web Services specification.
         -180 ≤ coalesce(lon, 0) ≤ 180 || throw(ArgumentError("`longitude` must be in range -180 to 180"))
         0 ≤ coalesce(minr, 0) ≤ 180 || throw(ArgumentError("`minradius` must be in range 0 to 180"))
         0 ≤ coalesce(maxr, 180) ≤ 180 || throw(ArgumentError("`maxradius` must be in range 0 to 180"))
-        coalesce(format, "xml") ∈ ("xml", "miniseed", "text") ||
-            throw(ArgumentError("`format` must be one of \"xml\" or \"text\""))
+        coalesce(format, "xml") ∈ ("xml", "isf", "miniseed", "text") ||
+            throw(ArgumentError("`format` must be one of \"xml\", \"isf\" \"miniseed\" or \"text\""))
         nodata ∈ (204, 404) || throw(ArgumentError("`nodata` must be 204 or 404"))
         new(st, et, minlat, maxlat, minlon, maxlon, lat, lon, minr, maxr, mind, maxd,
             minmag, maxmag, magtype, allorigins, allmags, arrs, id, limit, offset,
             orderby, catalog, contributor, updatedafter, format, nodata)
-        end
+    end
 end
 
 """
