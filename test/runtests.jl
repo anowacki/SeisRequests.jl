@@ -1,5 +1,7 @@
 using SeisRequests
 using Test
 
-include("fdsnws.jl")
-include("irisws.jl")
+@testset "All tests" begin
+    include("fdsnws.jl")
+    include("irisws.jl")
+end
