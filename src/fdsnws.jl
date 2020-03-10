@@ -191,7 +191,7 @@ the FDSN Web Services specification.
 |`longitude`|Specify the longitude to the used for a radius search.|
 |`minradius`|Limit results to stations within the specified minimum number of degrees from the geographic point defined by the latitude and longitude parameters.|
 |`maxradius`|Limit results to stations within the specified maximum number of degrees from the geographic point defined by the latitude and longitude parameters.|
-|`level`|Specify the level of detail for the results.|
+|`level`|Specify the level of detail for the results, one of `"netowrk`, `"station"` (default), `"channel"` or `"response"`.|
 |`includerestricted`|Specify if results should include information for restricted stations.|
 |`includeavailability`|Specify if results should include information about time series data availability.|
 |`updatedafter`|Limit to metadata updated after specified time; updates are data center specific.|
