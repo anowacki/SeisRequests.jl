@@ -43,7 +43,9 @@ const SERVERS = Dict{String,String}(
     "INGV" => "http://webservices.ingv.it",
     "IRIS" => "http://service.iris.edu",
     "ISC" => "http://www.isc.ac.uk",
-    "Orfeus" => "http://www.orfeus-eu.org")
+    "NEIC" => "http://earthquake.usgs.gov",
+    "Orfeus" => "http://www.orfeus-eu.org",
+    "Geofon" => "http://geofon.gfz-potsdam.de")
 
 const DEFAULT_SERVER = "IRIS"
 
