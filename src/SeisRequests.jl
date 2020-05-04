@@ -41,8 +41,10 @@ import DataStructures: OrderedDict
 "URIs of servers to which requests can be sent by key"
 const SERVERS = Dict{String,String}(
     "INGV" => "http://webservices.ingv.it",
+    "IPGP" => "http://ws.ipgp.fr",
     "IRIS" => "http://service.iris.edu",
     "ISC" => "http://www.isc.ac.uk",
+    "NCEDC" => "http://service.ncedc.org",
     "NEIC" => "http://earthquake.usgs.gov",
     "Orfeus" => "http://www.orfeus-eu.org",
     "Geofon" => "http://geofon.gfz-potsdam.de")
