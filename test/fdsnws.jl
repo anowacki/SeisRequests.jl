@@ -2,6 +2,7 @@
 
 using Test
 import Dates
+using Dates: DateTime
 using SeisRequests
 
 @testset "FDSNWS" begin
@@ -24,6 +25,12 @@ using SeisRequests
         @test_throws ArgumentError FDSNEvent(longitude=0, latitude=0, maxradius=181)
         @test_throws ArgumentError FDSNEvent(format="weird_format_please")
         @test_throws ArgumentError FDSNEvent(nodata=101)
+        # Conversion of strings to dates
+        @testset "Date conversion: $f" for f in (:starttime, :endtime, :updatedafter)
+            str = "2000-01-02T03:04:05.678"
+            dat = DateTime(2000, 1, 2, 3, 4, 5, 678)
+            @test FDSNEvent(; f=>str) == FDSNEvent(; f=>dat)
+        end
         let req = FDSNEvent()
             for field in fieldnames(FDSNEvent)
                 if field == :nodata
@@ -62,6 +69,11 @@ using SeisRequests
         @test_throws ArgumentError FDSNDataSelect(quality="A")
         @test_throws ArgumentError FDSNDataSelect(minimumlength=-2.0)
         @test_throws ArgumentError FDSNDataSelect(nodata=101)
+        # Conversion of strings to dates
+        @test FDSNDataSelect(starttime=Dates.DateTime(2000, 01, 01, 01, 02, 03, 456),
+            endtime=Dates.DateTime(3000, 03, 04, 05, 06, 07, 890)) ==
+            FDSNDataSelect(starttime="2000-01-01T01:02:03.456",
+                endtime="3000-03-04T05:06:07.89")
         let req = FDSNDataSelect()
             for field in fieldnames(FDSNDataSelect)
                 if field == :nodata
@@ -107,6 +119,14 @@ using SeisRequests
         @test_throws ArgumentError FDSNStation(longitude=0, latitude=0, maxradius=181)
         @test_throws ArgumentError FDSNStation(level="weird_level_please")
         @test_throws ArgumentError FDSNStation(nodata=101)
+        # Conversion of strings to dates
+        @testset "Date conversion: $f" for f in (:starttime, :endtime, :startbefore,
+                :endbefore, :startafter, :endafter, :updatedafter)
+            str = "2000-01-02T03:04:05.678"
+            dat = DateTime(2000, 1, 2, 3, 4, 5, 678)
+            @test FDSNStation(; f=>str) == FDSNStation(; f=>dat)
+        end
+
         for field in (:network, :station, :location, :channel)
             @test_throws ArgumentError FDSNStation(; field=>"β is not ASCII")
         end

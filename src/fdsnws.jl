@@ -48,7 +48,13 @@ the FDSN Web Services specification.
 |`contributor`|Limit to events contributed by a specified contributor.|
 |`updatedafter`|Limit to events updated after the specified time.|
 |`format`|Specify format of result, either `"xml"` (default) or `"text"` (`"isf"` from the ISC).  If this parameter is not specified the service must return QuakeML.|
-|`nodata`|Select status code for “no data”, either `204` (default) or `404`.|"""
+|`nodata`|Select status code for “no data”, either `204` (default) or `404`.|
+
+## Specifying dates
+Both `Dates.DateTime` objects and `String`s can be passed as values to the
+`starttime`, `endtime` and `updatedafter` keywords so long as they are valid.
+Examples include `"2000-01-01"` and `"2008-02-03T00:00:30"`.
+"""
 @with_kw struct FDSNEvent <: FDSNRequest
     starttime::MDateTime = missing
     endtime::MDateTime = missing
@@ -80,6 +86,9 @@ the FDSN Web Services specification.
     function FDSNEvent(st, et, minlat, maxlat, minlon, maxlon, lat, lon, minr, maxr, mind, maxd,
                        minmag, maxmag, magtype, allorigins, allmags, arrs, id, limit, offset,
                        orderby, catalog, contributor, updatedafter, format, nodata)
+        !ismissing(st) && (st = DateTime(st))
+        !ismissing(et) && (et = DateTime(et))
+        !ismissing(updatedafter) && (updatedafter = DateTime(updatedafter))
         !ismissing(st) && !ismissing(et) && st > et &&
            throw(ArgumentError("`starttime` must be before endtime"))
         (!ismissing(minr) || !ismissing(maxr)) && (ismissing(lat) || ismissing(lon)) &&
@@ -132,6 +141,11 @@ julia> FDSNDataSelect(station="ANMO", starttime=)
 |`longestonly`|Limit results to the longest continuous segment per channel.|
 |`format`|Specify format of result, the default value is `"miniseed"`.|
 |`nodata`|Select status code for “no data”, either ‘204’ (default) or ‘404’.|
+
+## Specifying dates
+Both `Dates.DateTime` objects and `String`s can be passed as values to the
+`starttime` and `endtime` keywords so long as they are valid.
+Examples include `"2000-01-01"` and `"2008-02-03T00:00:30"`.
 """
 @with_kw struct FDSNDataSelect <: FDSNRequest
     starttime::MDateTime = missing
@@ -146,6 +160,8 @@ julia> FDSNDataSelect(station="ANMO", starttime=)
     format::MString = missing
     nodata::Int = 204
     function FDSNDataSelect(st, et, net, sta, loc, cha, q, minlength, longestonly, format, nodata)
+        !ismissing(st) && (st = DateTime(st))
+        !ismissing(et) && (et = DateTime(et))
         !ismissing(st) && !ismissing(et) && st > et &&
             throw(ArgumentError("`starttime` must be before endtime"))
         !ismissing(net) && !isascii(net) && throw(ArgumentError("`network` must be ASCII"))
@@ -198,6 +214,12 @@ the FDSN Web Services specification.
 |`matchtimeseries`|Limit to metadata where selection criteria matches time series data availability.|
 |`format`|Specify format of result, either `"xml"` (default) or `"text"`.|
 |`nodata`|Select status code for “no data”, either `204` (default) or `404`.|
+
+## Specifying dates
+Both `Dates.DateTime` objects and `String`s can be passed as values to the
+`starttime`, `endtime`, `startbefore`, `startafter`, `endbefore`, `endafter`
+and `updatedafter` keywords so long as they are valid.
+Examples include `"2000-01-01"` and `"2008-02-03T00:00:30"`.
 """
 @with_kw struct FDSNStation <: FDSNRequest
     starttime::MDateTime = missing
@@ -228,6 +250,13 @@ the FDSN Web Services specification.
     function FDSNStation(st, et, sb, sa, eb, ea, net, sta, loc, cha, minlat, maxlat,
                          minlon, maxlon, lat, lon, minr, maxr, level, restricted,
                          availability, updatedafter, matchtimeseries, format, nodata)
+        !ismissing(st) && (st = DateTime(st))
+        !ismissing(et) && (et = DateTime(et))
+        !ismissing(sb) && (sb = DateTime(sb))
+        !ismissing(sa) && (sa = DateTime(sa))
+        !ismissing(eb) && (eb = DateTime(eb))
+        !ismissing(ea) && (ea = DateTime(ea))
+        !ismissing(updatedafter) && (updatedafter = DateTime(updatedafter))
         !ismissing(st) && !ismissing(et) && st > et &&
             throw(ArgumentError("`starttime` must be before endtime"))
         !ismissing(sb) && !ismissing(sa) && sb > sa &&

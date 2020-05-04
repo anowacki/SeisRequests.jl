@@ -90,6 +90,15 @@ using SeisRequests
                 response = get_request(req, verbose=false)
                 @test response.status in keys(SeisRequests.STATUS_CODES)
             end
+
+            # Conversion of strings to dates
+            @test IRISTimeSeries(network="AN", station="XYZ", location="",
+                channel="LHZ", format="miniseed",
+                starttime=Dates.DateTime(2000),
+                endtime=Dates.DateTime(2000, 01, 01, 01, 02, 03, 400)) ==
+                IRISTimeSeries(network="AN", station="XYZ", location="",
+                channel="LHZ", format="miniseed",
+                starttime="2000-01-01", endtime="2000-01-01T01:02:03.4")
         end
     end
 end

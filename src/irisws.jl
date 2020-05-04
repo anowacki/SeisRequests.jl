@@ -173,6 +173,8 @@ struct IRISTimeSeries <: IRISRequest
                             antialias, width, height, audiosamplerate, audiocompress, output,
                             format, process)
         location in ("  ", "") && (location = "--")
+        !ismissing(starttime) && (starttime = DateTime(starttime))
+        !ismissing(endtime) && (endtime = DateTime(endtime))
         !ismissing(starttime) && !ismissing(endtime) && starttime > endtime &&
             throw(ArgumentError("`starttime` must be before endtime"))
         coalesce(duration, 1) > 0 || throw(ArgumentError("`duration` must be positive"))
@@ -274,6 +276,28 @@ end
 
 # To be the same as the structs which use Parameters.@with_kw
 Base.show(io::IO, p::SeisRequests.IRISTimeSeries) = dump(IOContext(io, :limit => true), p, maxdepth=1)
+
+function Base.:(==)(r1::IRISTimeSeries, r2::IRISTimeSeries)
+    for f in fieldnames(IRISTimeSeries)
+        v1, v2 = getfield.((r1, r2), f)
+        # Special case as OrderedDicts compare as equal even with different
+        # orders of the keys!
+        if f === :process
+            length(v1) == length(v1) || return false
+            for ((key1, val1), (key2,val2)) in zip(v1, v2)
+                key1 === key2 || return false
+                val1 === val2 || return false
+            end
+        else
+            if v1 === missing || v2 === missing
+                v1 === v2 || return false
+            else
+                v1 == v2 || return false
+            end
+        end
+    end
+    true
+end
 
 service_string(::IRISTimeSeries) = "timeseries"
 
