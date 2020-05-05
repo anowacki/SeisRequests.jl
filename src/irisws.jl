@@ -151,6 +151,11 @@ be combined with the `format` option:
 |`sacbl`|SAC – binary little-endian format [deprecated and used with `output`]|
 
 As these outputs are deprecated, they may stop working in the future.
+
+## Specifying dates
+Both `Dates.DateTime` objects and `String`s can be passed as values to the
+`starttime` and `endtime` keywords so long as they are valid.
+Examples include `"2000-01-01"` and `"2008-02-03T00:00:30"`.
 """
 struct IRISTimeSeries <: IRISRequest
     network::String
