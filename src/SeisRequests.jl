@@ -85,6 +85,7 @@ Current subtypes of `SeisRequest`:
 abstract type SeisRequest end
 
 include("fdsnws.jl")
+include("fdsnws-formats.jl")
 include("irisws.jl")
 
 """Default version string for all requests."""
