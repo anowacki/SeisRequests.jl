@@ -18,7 +18,16 @@ protocol_string(::FDSNRequest) = "fdsnws"
 Create a FDSN web services event query which can be sent to a datacentre which implements
 the FDSN Web Services specification.
 
-## Available options:
+## Examples
+A request asking for events above magnitude 3 within 5° distance of the
+Eiffel Tower in the last five years:
+```
+julia> using Dates
+
+julia> FDSNEvent(starttime=now()-Year(5), longitude=2.295, latitude=48.858, maxradius=5, minmagnitude=3)
+```
+
+## Available options
 
 |Parameter|Description|
 |:--------|:----------|
@@ -120,13 +129,17 @@ end
 Create a FDSN web services data selection query which can be sent to a datacentre which
 implements the FDSN Web Services specification.
 
-Set options with keyword arguments, e.g.:
+Set options with keyword arguments.
 
+## Example
+Request for data in miniseed format (the default) for station A07E in network XM
+for all channels on the first day of 2013.
 ```
-julia> FDSNDataSelect(station="ANMO", starttime=)
-```
+julia> using Dates
 
-## Available options:
+julia> FDSNDataSelect(network="XM", station="A07E", starttime=DateTime(2013), endtime=DateTime(2013)+Day(1))
+
+## Available options
 
 |Parameter|Description|
 |:--------|:----------|
@@ -184,6 +197,28 @@ end
 
 Create a FDSN web services station query which can be sent to a datacentre which implements
 the FDSN Web Services specification.
+
+## Example
+
+Information about all stations called `"ANMO"`, in all networks, at the
+default `"station"` level.
+```
+julia> FDSNStation(station="ANMO")
+```
+
+Information about the channels, including sensor response information,
+for the broadband, high-sensitivity channels of station JSA in Jersey,
+Channel Islands
+```
+julia> FDSNStation(network="GB", station="JSA", channel="BH?", level="response")
+
+Every station known by the datacentre.  Here we use the `format="text"` option
+to get only the basic information on where stations are.  (Note that as of
+2020, sending this to the default datacentre, IRIS, returns 50,000 stations.
+Amazingly, the entire thing takes only a few seconds.)
+```
+julia> FDSNStation(format="text")
+```
 
 ## Available options
 
