@@ -26,6 +26,13 @@ function _parse(T, s)
     v
 end
 
+function _parse(::Type{DateTime}, s)
+    # Handle the fact that empty strings are always parsed as valid and
+    # give you the date 0001-01-01!
+    isempty(s) && return missing
+    DateTime(s)
+end
+
 """
     FDSNNetworkTextResponse
 
@@ -36,7 +43,7 @@ struct FDSNNetworkTextResponse
     network::String
     description::String
     starttime::DateTime
-    endtime::DateTime
+    endtime::MDateTime
     total_stations::Int
 end
 
@@ -64,7 +71,7 @@ struct FDSNStationTextResponse
     elevation::Float64
     sitename::String
     starttime::DateTime
-    endtime::DateTime
+    endtime::MDateTime
 end
 
 function Base.convert(::Type{FDSNStationTextResponse}, s::AbstractString)
@@ -104,7 +111,7 @@ struct FDSNChannelTextResponse
     scale_units::String
     sample_rate::Float64
     starttime::DateTime
-    endtime::DateTime
+    endtime::MDateTime
 end
 
 function Base.convert(::Type{FDSNChannelTextResponse}, s::AbstractString)

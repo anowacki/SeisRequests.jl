@@ -155,13 +155,16 @@ using SeisRequests
     end
 
     @testset "FDSN text formats" begin
-        # Correct parsing
+        # Correct parsing, including potentially missing end date
         @testset "FDSNNetworkTextResponse" begin
             @test convert(SeisRequests.FDSNNetworkTextResponse,
                 "II|Global Seismograph Network (GSN - IRIS/IDA)|1986-01-01T00:00:00|2500-12-12T23:59:59|50") ==
                 SeisRequests.FDSNNetworkTextResponse("II",
                     "Global Seismograph Network (GSN - IRIS/IDA)",
                     DateTime(1986), DateTime(2500, 12, 12, 23, 59, 59), 50)
+            @test convert(SeisRequests.FDSNNetworkTextResponse,
+                "A|B|2000-01-01||0") ==
+                SeisRequests.FDSNNetworkTextResponse("A", "B", DateTime(2000), missing, 0)
         end
         @testset "FDSNStationTextResponse" begin
             @test convert(SeisRequests.FDSNStationTextResponse,
@@ -169,6 +172,11 @@ using SeisRequests
                 SeisRequests.FDSNStationTextResponse("IU", "ANMO", 34.9459,
                     -106.4572, 1850.0, "Albuquerque, New Mexico, USA",
                     DateTime(1989, 08, 29), DateTime(1995, 07, 14))
+            @test convert(SeisRequests.FDSNStationTextResponse,
+                "A|B|1|2|3|X|2000-01-01|") ==
+                SeisRequests.FDSNStationTextResponse("A", "B", 1, 2, 3, "X",
+                    DateTime(2000), missing)
+
         end
         @testset "FDSNChannelTextResponse" begin
             @test convert(SeisRequests.FDSNChannelTextResponse,
@@ -178,6 +186,10 @@ using SeisRequests
                     "Kinemetrics FBA-23 Low-GainSensor", 53687.1,
                     1.0, "M/S**2", 80.0, DateTime(2005, 9, 28, 22),
                     DateTime(2009, 7, 8, 22))
+            @test convert(SeisRequests.FDSNChannelTextResponse,
+                "A|B|C|D|1|2|3|4|5|6|E|7|8|F|9|2000-01-01|") ==
+                SeisRequests.FDSNChannelTextResponse("A", "B", "C", "D",
+                    1, 2, 3, 4, 5, 6, "E", 7, 8, "F", 9, DateTime(2000), missing)
         end
         @testset "FDSNEventTextResponse" begin
             @test convert(SeisRequests.FDSNEventTextResponse,
