@@ -52,6 +52,12 @@ the channel of interest, and are all required. Wildcards are not accepted.
 - `location`: Location code. Use `loc=--` for empty location codes
 - `channel`: Channel Code
 
+This can instead be combined into the single option:
+
+- `code`: SEED-style channel code of the form `"⟨network⟩.⟨station⟩.⟨location⟩.⟨channel⟩"`.
+
+Note that `code` cannot be combined with the separate SCNL keywords.
+
 ### Date-Range Options (required)
 Time ranges must be defined by specifying a start time with either an end time or a duration
 in seconds.
@@ -259,10 +265,17 @@ struct IRISTimeSeries <: IRISRequest
 end
 
 function IRISTimeSeries(;
+                        code=missing,
                         network=missing, station=missing, location=missing, channel=missing,
                         starttime=missing, endtime=missing, duration=missing, antialias=missing,
                         width=missing, height=missing, audiosamplerate=missing,
                         audiocompress=missing, output=missing, format=missing, kwargs...)
+    if !ismissing(code)
+        any(!ismissing, (network, station, location, channel)) &&
+            throw(ArgumentError("`code` cannot be provided with any of " *
+                                "`network`, `station`, `location`, or `channel`"))
+        network, station, location, channel = split_channel_code(code)
+    end
     any(ismissing, (network, station, location, channel, starttime)) &&
         throw(ArgumentError("network, station, location, channel and starttime, plus one of " *
                             "endtime or duration, must all be specified"))
@@ -278,9 +291,6 @@ function IRISTimeSeries(;
                    antialias, width, height, audiosamplerate, audiocompress, output,
                    format, process)
 end
-
-# To be the same as the structs which use Parameters.@with_kw
-Base.show(io::IO, p::SeisRequests.IRISTimeSeries) = dump(IOContext(io, :limit => true), p, maxdepth=1)
 
 function Base.:(==)(r1::IRISTimeSeries, r2::IRISTimeSeries)
     for f in fieldnames(IRISTimeSeries)

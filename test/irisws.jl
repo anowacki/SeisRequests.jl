@@ -91,6 +91,18 @@ using SeisRequests
                 @test response.status in keys(SeisRequests.STATUS_CODES)
             end
 
+            @testset "Code conversion" begin
+                st = Dates.DateTime(2000)
+                et = st + Dates.Hour(1)
+                fmt = "miniseed"
+                @test_throws ArgumentError IRISTimeSeries(code="A.B.C.D",
+                    network="A", station="B", location="C", channel="D",
+                    starttime=st, endtime=et, format=fmt)
+                @test IRISTimeSeries(code="A.B..D", starttime=st, endtime=et, format=fmt) ==
+                    IRISTimeSeries(network="A", station="B", location="", channel="D",
+                        starttime=st, endtime=et, format=fmt)
+            end
+
             # Conversion of strings to dates
             @test IRISTimeSeries(network="AN", station="XYZ", location="",
                 channel="LHZ", format="miniseed",

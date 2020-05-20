@@ -69,6 +69,15 @@ using SeisRequests
         @test_throws ArgumentError FDSNDataSelect(quality="A")
         @test_throws ArgumentError FDSNDataSelect(minimumlength=-2.0)
         @test_throws ArgumentError FDSNDataSelect(nodata=101)
+
+        @testset "Code conversion" begin
+            @test_throws ArgumentError FDSNDataSelect(code="A.B.C.D", network="A")
+            @test_throws ArgumentError FDSNDataSelect(code="A.B.C.D", station="A")
+            @test_throws ArgumentError FDSNDataSelect(code="A.B.C.D", location="A")
+            @test_throws ArgumentError FDSNDataSelect(code="A.B.C.D", channel="A")
+            @test FDSNDataSelect(code="A,B.C*..D") ==
+            FDSNDataSelect(network="A,B", station="C*", location="", channel="D")
+        end
         # Conversion of strings to dates
         @test FDSNDataSelect(starttime=Dates.DateTime(2000, 01, 01, 01, 02, 03, 456),
             endtime=Dates.DateTime(3000, 03, 04, 05, 06, 07, 890)) ==
@@ -119,6 +128,16 @@ using SeisRequests
         @test_throws ArgumentError FDSNStation(longitude=0, latitude=0, maxradius=181)
         @test_throws ArgumentError FDSNStation(level="weird_level_please")
         @test_throws ArgumentError FDSNStation(nodata=101)
+
+        @testset "Code conversion" begin
+            @test_throws ArgumentError FDSNStation(code="A.B.C.D", network="A")
+            @test_throws ArgumentError FDSNStation(code="A.B.C.D", station="A")
+            @test_throws ArgumentError FDSNStation(code="A.B.C.D", location="A")
+            @test_throws ArgumentError FDSNStation(code="A.B.C.D", channel="A")
+            @test FDSNStation(code="A,B.C*..D") ==
+                FDSNStation(network="A,B", station="C*", location="", channel="D")
+        end
+
         # Conversion of strings to dates
         @testset "Date conversion: $f" for f in (:starttime, :endtime, :startbefore,
                 :endbefore, :startafter, :endafter, :updatedafter)
@@ -138,6 +157,10 @@ using SeisRequests
                     @test getfield(req, field) === missing
                 end
             end
+        end
+        @testset "Default level" begin
+            @test FDSNStation(network="A", station="B").level === missing
+            @test FDSNStation(channel="X").level == "channel"
         end
         # Methods
         let req = FDSNStation(network="GB", station="JSA", location="--", channel="?H?",
