@@ -4,13 +4,15 @@
 An abstract type representing requests conforming to the FDSN Web Services specification.
 
 Current subtypes of `FDSNRequest`:
-- `FDSNDataSelect`
-- `FDSNEvent`
-- `FDSNStation`
+- [`FDSNDataSelect`](@ref)
+- [`FDSNEvent`](@ref)
+- [`FDSNStation`](@ref)
 """
 abstract type FDSNRequest <: SeisRequest end
 
 protocol_string(::FDSNRequest) = "fdsnws"
+
+Base.broadcastable(request::FDSNRequest) = Ref(request)
 
 """
     FDSNEvent(kwargs...)

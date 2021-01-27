@@ -281,6 +281,9 @@ function IRISTimeSeries(;
                             "endtime or duration, must all be specified"))
     count(ismissing, (endtime, duration)) == 1 ||
         throw(ArgumentError("One and only one of `endtime` or `duration` must be specified"))
+    if ismissing(output) && ismissing(format)
+        format = "miniseed"
+    end
     process = OrderedDict{Symbol,Any}()
     for (k, v) in kwargs
         k in keys(IRISTimeSeries_PROCESSING_FIELDS) ||
@@ -313,6 +316,8 @@ function Base.:(==)(r1::IRISTimeSeries, r2::IRISTimeSeries)
     end
     true
 end
+
+Base.broadcastable(request::IRISTimeSeries) = Ref(request)
 
 service_string(::IRISTimeSeries) = "timeseries"
 

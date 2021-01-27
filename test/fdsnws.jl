@@ -226,7 +226,7 @@ using SeisRequests
                 SeisRequests.FDSNEventTextResponse("usp000jv5f",
                     DateTime(2012, 11, 7, 16, 35, 46, 930), 13.988, -91.895,
                     24.0, "us", "us", "us", "usp000jv5f", "mww", 7.4, "us",
-                    "offshore Guatemala", "")
+                    "offshore Guatemala", missing)
         end
         @testset "Error throwing" begin
             # Field counting

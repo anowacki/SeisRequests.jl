@@ -17,7 +17,7 @@ using SeisRequests
                           :channel => "BHZ",
                           :starttime => Dates.DateTime(2000, 1, 1),
                           :endtime => Dates.DateTime(2000, 1, 1, 0, 0, 30),
-                          :format => "miniseed")
+                          )
             # Missing required parameters
             for arg in keys(kwargs)
                 kwargs2 = delete!(deepcopy(kwargs), arg)
@@ -32,6 +32,9 @@ using SeisRequests
                     @test getfield(req, field) == kwargs[field]
                 elseif field == :process
                     @test isempty(getfield(req, field))
+                elseif field == :format
+                    # Default is for `format = "miniseed"`
+                    @test getfield(req, field) == "miniseed"
                 else
                     @test getfield(req, field) === missing
                 end

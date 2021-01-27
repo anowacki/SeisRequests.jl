@@ -33,13 +33,15 @@ function _parse(::Type{DateTime}, s)
     DateTime(s)
 end
 
+abstract type FDSNTextResponse end
+
 """
     FDSNNetworkTextResponse
 
 Struct containing the fields returned from a `FDSNStation` request where
 the `level` is `"network"` and the `format` is `"text"`.
 """
-struct FDSNNetworkTextResponse
+struct FDSNNetworkTextResponse <: FDSNTextResponse
     network::String
     description::String
     starttime::DateTime
@@ -63,7 +65,7 @@ end
 Struct containing the fields returned from a `FDSNStation` request where
 the `level` is `"station"` and the `format` is `"text"`.
 """
-struct FDSNStationTextResponse
+struct FDSNStationTextResponse <: FDSNTextResponse
     network::String
     station::String
     latitude::Float64
@@ -94,7 +96,7 @@ end
 Struct containing the fields returned from a `FDSNStation` request where
 the `level` is `"channel"` and the `format` is `"text"`.
 """
-struct FDSNChannelTextResponse
+struct FDSNChannelTextResponse <: FDSNTextResponse
     network::String
     station::String
     location::String
@@ -159,7 +161,7 @@ struct FDSNEventTextResponse
     magnitude::Float64
     mag_author::String
     event_location_name::String
-    event_type::String
+    event_type::Union{Missing,String}
 end
 
 function Base.convert(::Type{FDSNEventTextResponse}, s::AbstractString)
@@ -179,9 +181,20 @@ function Base.convert(::Type{FDSNEventTextResponse}, s::AbstractString)
     mag_author = tokens[12]
     event_location_name = tokens[13]
     # Account for FDSNWS v1.1 and below lacking the event_type field
-    event_type = length(tokens) == 14 ? tokens[14] : ""
+    event_type = length(tokens) == 14 ? tokens[14] : missing
     FDSNEventTextResponse(event_id, time, latitude, longitude, depth, author,
         catalog, contributor, contributor_id, mag_type, mangitude, mag_author,
         event_location_name, event_type)
 end
 
+"""
+    ISFTextResponse
+
+Struct containing **some of** the fields returned from a `FDSNEvent` request where
+the format is "isf" (IASPEI Seismic Format, as returned by the ISC).
+"""
+struct ISFTextResponse
+    isprime::Bool
+    iscentroid::Bool
+
+end
