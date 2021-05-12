@@ -76,7 +76,7 @@ using SeisRequests
             @test_throws ArgumentError FDSNDataSelect(code="A.B.C.D", location="A")
             @test_throws ArgumentError FDSNDataSelect(code="A.B.C.D", channel="A")
             @test FDSNDataSelect(code="A,B.C*..D") ==
-            FDSNDataSelect(network="A,B", station="C*", location="", channel="D")
+                FDSNDataSelect(network="A,B", station="C*", location="", channel="D")
         end
         # Conversion of strings to dates
         @test FDSNDataSelect(starttime=Dates.DateTime(2000, 01, 01, 01, 02, 03, 456),
@@ -213,6 +213,12 @@ using SeisRequests
                 "A|B|C|D|1|2|3|4|5|6|E|7|8|F|9|2000-01-01|") ==
                 SeisRequests.FDSNChannelTextResponse("A", "B", "C", "D",
                     1, 2, 3, 4, 5, 6, "E", 7, 8, "F", 9, DateTime(2000), missing)
+            @test convert(SeisRequests.FDSNChannelTextResponse,
+                "XB|ELYSE|02|BDO|4.502384|135.623447|-2613.4|-0.1|90.0|0.0|PRESSURE||||20.0|2018-12-20T07:34:25|2022-12-31T23:59:59") ==
+                SeisRequests.FDSNChannelTextResponse("XB", "ELYSE", "02", "BDO",
+                    4.502384, 135.623447, -2613.4, -0.1, 90, 0, "PRESSURE", missing,
+                    missing, missing, 20, DateTime(2018, 12, 20, 7, 34, 25),
+                    DateTime(2022, 12, 31, 23, 59, 59))
         end
         @testset "FDSNEventTextResponse" begin
             @test convert(SeisRequests.FDSNEventTextResponse,
