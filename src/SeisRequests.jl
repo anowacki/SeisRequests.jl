@@ -93,6 +93,7 @@ Current subtypes of `SeisRequest`:
 """
 abstract type SeisRequest end
 
+include("compat.jl")
 include("util.jl")
 include("fdsnws.jl")
 include("fdsnws-formats.jl")
