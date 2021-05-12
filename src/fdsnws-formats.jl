@@ -33,6 +33,9 @@ function _parse(::Type{DateTime}, s)
     DateTime(s)
 end
 
+_parse(::Type{String}, s) = s
+_parse(::Type{Union{Missing,T}}, s) where T = isempty(s) ? missing : _parse(T, s)
+
 abstract type FDSNTextResponse end
 
 """
@@ -108,9 +111,9 @@ struct FDSNChannelTextResponse <: FDSNTextResponse
     azimuth::Float64
     dip::Float64
     sensor_description::String
-    scale::Float64
-    scale_frequency::Float64
-    scale_units::String
+    scale::MFloat
+    scale_frequency::MFloat
+    scale_units::MString
     sample_rate::Float64
     starttime::DateTime
     endtime::MDateTime
@@ -129,9 +132,9 @@ function Base.convert(::Type{FDSNChannelTextResponse}, s::AbstractString)
     azimuth = _parse(Float64, tokens[9])
     dip = _parse(Float64, tokens[10])
     sensor_description = tokens[11]
-    scale = _parse(Float64, tokens[12])
-    scale_frequency = _parse(Float64, tokens[13])
-    scale_units = tokens[14]
+    scale = _parse(MFloat, tokens[12])
+    scale_frequency = _parse(MFloat, tokens[13])
+    scale_units = scale === missing ? _parse(MString, tokens[14]) : tokens[14]
     sample_rate = _parse(Float64, tokens[15])
     starttime = _parse(DateTime, tokens[16])
     endtime = _parse(DateTime, tokens[17])
