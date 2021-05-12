@@ -4,7 +4,8 @@ os:
   - linux
 julia:
   - 1.0
-  - 1.1
+  - 1.5
+  - 1.6
   - nightly
 
 notifications:
@@ -15,3 +16,6 @@ matrix:
     - julia: nightly
 
 coveralls: true
+
+before_install:
+  - julia -e 'import Pkg; Pkg.pkg"add https://github.com/anowacki/Geodesics.jl https://github.com/anowacki/Seis.jl"'
