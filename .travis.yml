@@ -18,4 +18,4 @@ matrix:
 coveralls: true
 
 before_install:
-  - julia -e 'import Pkg; Pkg.pkg"add https://github.com/anowacki/Geodesics.jl https://github.com/anowacki/Seis.jl"'
+  - julia -e 'import Pkg; Pkg.pkg"add https://github.com/anowacki/Geodesics.jl https://github.com/anowacki/Seis.jl https://github.com/anowacki/StationXML.jl"'
