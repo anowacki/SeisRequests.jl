@@ -2,9 +2,8 @@
 
 Gather seismic data and metadata from web services using Julia.
 
-[![Build Status](https://travis-ci.org/anowacki/SeisRequests.jl.svg?branch=master)](https://travis-ci.org/anowacki/SeisRequests.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/mg2cfsix16wuwq3f?svg=true)](https://ci.appveyor.com/project/AndyNowacki/seisrequests-jl)
-[![Coverage Status](https://coveralls.io/repos/github/anowacki/SeisRequests.jl/badge.svg?branch=master)](https://coveralls.io/github/anowacki/SeisRequests.jl?branch=master)
+[![Build Status](https://github.com/anowacki/SeisRequests.jl/workflows/CI/badge.svg)](https://github.com/anowacki/SeisRequests.jl/actions)
+[![codecov](https://codecov.io/gh/anowacki/SeisRequests.jl/branch/master/graph/badge.svg?token=d0ePcA1m54)](https://codecov.io/gh/anowacki/SeisRequests.jl)
 
 ## About SeisRequests
 
