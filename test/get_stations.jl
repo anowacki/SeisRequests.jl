@@ -221,7 +221,7 @@ end
 
         @testset "StationXML format" begin
             sxml = StationXML.FDSNStationXML(source="Me", created=DateTime(1000),
-                schema_version="1.0")
+                schema_version="1.1")
             net = StationXML.Network(code="AN", start_date=DateTime(2000), end_date=DateTime(3000))
             sta = StationXML.Station(code="FAKE",
                 longitude=1, latitude=2, elevation=3, site=StationXML.Site(name="Fake site"),
@@ -302,11 +302,9 @@ end
     @testset "Real requests" begin
         @testset "Verbosity" begin
             @test_logs (:info, "Request status: Successful request, results follow"
-                ) (:warn, "document is StationXML version 1.1.0; only v1.0 data will be read"
                 ) get_stations(network="GB", station="J*", channel="?HZ",
                     level="station", verbose=true)
-            @test_logs (:warn, "document is StationXML version 1.1.0; only v1.0 data will be read"
-                ) get_stations(network="GB", station="JSA", level="station",
+            @test_logs get_stations(network="GB", station="JSA", level="station",
                 verbose=false)
         end
 
