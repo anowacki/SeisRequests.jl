@@ -7,8 +7,8 @@ Gather seismic data and metadata from web services using Julia.
 
 ## About SeisRequests
 
-Seisrequests allows you to easily create a request for seismic data which you
-can then pass to any server round the world which supports either the FDSN
+SeisRequests allows you to easily create and submit a request for seismic data
+to any server round the world which supports either the FDSN
 or IRIS web services specifications.  Examples include [IRIS](https://iris.edu)
 itself and the EU's data repository [Orfeus](https://www.orfeus-eu.org).
 
@@ -17,112 +17,124 @@ information amongst other things.
 
 ## Installing
 
-Add SeisRequests on v1 of Julia and upwards like so:
+Add SeisRequests like so:
 
 ```julia
 julia> ] # Type ']' to enter pkg mode
 
-pkg> add https://github.com/anowacki/SeisRequests.jl
+pkg> add https://github.com/anowacki/Geodesics.jl https://github.com/anowacki/Seis.jl https://github.com/anowacki/StationXML.jl https://github.com/anowacki/SeisRequests.jl
 ```
 
 ## Using
 
-Create requests of the kind you like using one of the constructors:
+### High-level interface
+If you just want to get earthquake parameters, station metadata or raw
+seismic data, use the high-level interface, which offers three main
+functions:
+- `get_events`, to return `Seis.Event`s with information about seismic
+  events in various catalogues.
+- `get_stations`, to return `Seis.Station`s with metadata about seismic
+  sensors.
+- `get_data`, to return `Seis.Trace`s with raw seismic data.
 
-- Using the FDSN Web Services standard:
-  - `FDSNEvent`: Query for events
-  - `FDSNStation`: Look for stations
-  - `FDSNDataSelect`: Request waveform data
-- Using the IRIS Web Services standard:
-  - `IRISTimeSeries`: Requests waveform data
+Each of these accept keyword arguments to define the region of interest
+in which to search for the events or stations.  For details of all keywords
+which can be used, see the docstrings for `FDSNEvent`, `FDSNStation` and
+`FDSNDataSelect`.
 
-Each of these constructors has comprehensive documentation you can access
+#### Example
+For example, let's try and find some data for the Cwmllynfell event in
+South Wales on 17 February 2018:
+
+```julia
+julia> using SeisRequests, Dates
+
+julia> origintime = DateTime(2018, 02, 17, 14, 31, 06);
+
+julia> event = get_events(starttime=origintime-Second(10), endtime=origintime+Second(10), minmagnitude=4) |> first
+Seis.Event{Float64,Seis.Geographic{Float64}}:
+        lon: -3.8936
+        lat: 51.7074
+        dep: 10.42
+       time: 2018-02-17T14:31:04.750
+         id: smi:service.iris.edu/fdsnws/event/1/query?originid=28547804
+       meta: type => "earthquake"
+             quakeml => QuakeML.Event
+  description: Array{QuakeML.EventDescription}((1,))
+  comment: Array{QuakeML.Comment}((0,))
+  focal_mechanism: Array{QuakeML.FocalMechanism}((0,))
+  amplitude: Array{QuakeML.Amplitude}((0,))
+  magnitude: Array{QuakeML.Magnitude}((1,))
+  station_magnitude: Array{QuakeML.StationMagnitude}((0,))
+  origin: Array{QuakeML.Origin}((1,))
+  pick: Array{QuakeML.Pick}((0,))
+  preferred_origin_id: QuakeML.ResourceIdentifier
+  preferred_magnitude_id: QuakeML.ResourceIdentifier
+  preferred_focal_mechanism_id: Missing missing
+  type: QuakeML.EventType
+  type_certainty: Missing missing
+  creation_info: Missing missing
+  public_id: QuakeML.ResourceIdentifier
+
+             author => "us"
+             mag_type => "mb"
+             mag_author => "us"
+             mag => 4.3
+             description => "UNITED KINGDOM (Flinn-Engdahl region)"
+             server => "IRIS"
+```
+
+Now let's get the metadata about the station [JSA](http://www.earthquakes.bgs.ac.uk/data/station_book/stationbook_jsa.html)
+if it was active at the time:
+
+```julia
+julia> stations = get_stations(event, code="GB.JSA.*.BH?")
+[ Info: Request status: Successful request, results follow
+3-element Vector{GeogStation{Float64}}:
+ Station: GB.JSA..BHE, lon: -2.171698, lat: 49.187801, dep: 0.0, elev: 39.0, azi: 90.0, inc: 90.0, meta: 4 keys
+ Station: GB.JSA..BHN, lon: -2.171698, lat: 49.187801, dep: 0.0, elev: 39.0, azi: 0.0, inc: 90.0, meta: 4 keys
+ Station: GB.JSA..BHZ, lon: -2.171698, lat: 49.187801, dep: 0.0, elev: 39.0, azi: 0.0, inc: 0.0, meta: 4 keys
+```
+
+If we want to get some data from here, we can ask how long before and
+after the earthquake we want, the finally submit a request for some data.
+In this case, let's ask for 6 minutes (300 s) of data.
+
+```julia
+julia> data = get_data(event, stations, Second(0), Minute(6))
+[ Info: Request status: Successful request, results follow
+3-element Vector{Trace{Float64, Vector{Float64}, Seis.Geographic{Float64}}}:
+ Seis.Trace(GB.JSA..BHE: delta=0.02, b=0.015, nsamples=18000)
+ Seis.Trace(GB.JSA..BHN: delta=0.02, b=0.005, nsamples=18000)
+ Seis.Trace(GB.JSA..BHZ: delta=0.02, b=0.015, nsamples=18000)
+```
+
+If we have Plots installed, we can now look at our lovely data!
+
+```julia
+julia> using Seis.Plot, Plots
+
+julia> plot(data)
+```
+
+![Cwmllynfell 2018-02-17 seismic event recorded at JSA, Jersey](docs/images/Cwmllynfell_JSA.png)
+
+
+### Low-level interface
+The high-level functions work by calling the low-level interface, which
+operates in this way:
+1. Create a request using a constructor:
+  - Using the FDSN Web Services standard:
+    - `FDSNEvent`: Query for events
+    - `FDSNStation`: Look for stations
+    - `FDSNDataSelect`: Request waveform data
+  - Using the IRIS Web Services standard:
+    - `IRISTimeSeries`: Request waveform data with preprocessing done
+3. Send that request to your preferred server with `get_request`, and
+   get back a `HTTP.Response`, containing the raw response in the `.body`
+   field.
+4. Process the raw output as needed.
+
+Each of the constructors has comprehensive documentation you can access
 in the REPL by typing, e.g., `?FDSNEvent`.
 
-These requests can then be passed to the `get_request` function, which returns
-a `HTTP.Messages.Response` containing the information sent by the server.
-
-SeisRequests doesn't itself yet process this information further, which is
-up to the user.
-
-For example, let's try and find information about the high-gain channels of
-the UK station in Jersey:
-
-```julia
-julia> using SeisRequests
-
-julia> req = FDSNStation(station="JSA", network="GB", channel="?H?", level="channel", format="text")
-FDSNStation
-  starttime: Missing missing
-  endtime: Missing missing
-  startbefore: Missing missing
-  startafter: Missing missing
-  endbefore: Missing missing
-  endafter: Missing missing
-  network: String "GB"
-  station: String "JSY"
-  ⋮
-  matchtimeseries: Missing missing
-  format: String "text"
-  nodata: Int64 204
-
-julia> get_request(req)
-[ Info: Request status: Successful request, results follow
-HTTP.Messages.Response:
-"""
-HTTP/1.1 200 OK
-Server: Apache-Coyote/1.1
-access-control-allow-origin: *
-content-disposition: inline; filename="fdsnws-station_2018-08-23T13:37:35Z.txt"
-Content-Type: text/plain
-Content-Length: 176
-Date: Thu, 23 Aug 2018 13:37:35 GMT
-Connection: close
-
-#Network | Station | Latitude | Longitude | Elevation | SiteName | StartTime | EndTime 
-GB|JSA|49.1878|-2.171698|39.0|ST AUBINS, JERSEY|2007-09-06T00:00:00|2599-12-31T23:59:59
-"""
-```
-
-If we want to get some data from here, we can ask for SAC data and read
-the response using the [SAC](https://github.com/anowacki/SAC.jl) module,
-then plot it up using [SACPlot](https://github.com/anowacki/SACPlot.jl):
-
-```julia
-julia> using Dates, SAC # `using Base.Dates` if still on Julia v0.6
-
-julia> otime = DateTime(2018, 02, 17, 14, 31, 6) # Cymllynfell event, South Wales
-2018-02-17T14:31:06
-
-julia> response = get_request(IRISTimeSeries(network="GB", station="JSA", location="--", channel="BHZ", starttime=otime, endtime=otime+Minute(5), output="sacbb"));
-[ Info: Request status: Successful request, results follow
-
-julia> trace = SACtr(response.body)
-SAC.SACtr:
-    delta: 0.02
-   depmin: -9348.0
-   depmax: 9834.0
-        b: 0.0
-        e: 299.97998
-   depmen: 1.023
-   nzyear: 2018
-   nzjday: 48
-   nzhour: 14
-    nzmin: 31
-    nzsec: 6
-   nzmsec: 5
-    nvhdr: 6
-     npts: 15000
-   iftype: 1
-    leven: true
-   lpspol: true
-   lovrok: true
-   lcalda: true
- unused18: true
-    kstnm: JSA
-   kcmpnm: BHZ
-   knetwk: GB
-
-julia> using SACPlot; plot1(trace)
-```
-![Cwmllynfell 2018-02-17 seismic event recorded at JSA, Jersey](docs/images/Cwmllynfell_JSA.png)
