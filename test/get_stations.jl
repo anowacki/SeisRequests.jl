@@ -208,7 +208,8 @@ end
                                 :startdate=>DateTime(2005, 9, 28, 22),
                                 :server=>server))]
                     for (o, ot) in zip(out, out_true)
-                        @testset "Field: $f" for f in filter(x->x∉(:pos, :meta), propertynames(o))
+                        # `collect(propertynames(o))` for compatibility with Julia v1.2
+                        @testset "Field: $f" for f in filter(x->x∉(:pos, :meta), collect(propertynames(o)))
                             @test getproperty(o, f) === getproperty(ot, f)
                         end
                         @testset "Key: $k" for (k, v) in o.meta
