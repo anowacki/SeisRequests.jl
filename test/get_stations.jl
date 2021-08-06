@@ -346,7 +346,6 @@ end
                 for (s, s′) in zip(stas, stas′)
                     @test stations_equal(s, s′)
                 end
-                # @test all(stations_equal.(stas, stas′))
                 # Stations definitely were active when the event occurred
                 @test all(x -> x.meta.startdate <= evt.time <=
                     coalesce(x.meta.enddate, typemax(DateTime)), stas)
