@@ -52,6 +52,12 @@ the channel of interest, and are all required. Wildcards are not accepted.
 - `location`: Location code. Use `loc=--` for empty location codes
 - `channel`: Channel Code
 
+This can instead be combined into the single option:
+
+- `code`: SEED-style channel code of the form `"⟨network⟩.⟨station⟩.⟨location⟩.⟨channel⟩"`.
+
+Note that `code` cannot be combined with the separate SCNL keywords.
+
 ### Date-Range Options (required)
 Time ranges must be defined by specifying a start time with either an end time or a duration
 in seconds.
@@ -151,6 +157,11 @@ be combined with the `format` option:
 |`sacbl`|SAC – binary little-endian format [deprecated and used with `output`]|
 
 As these outputs are deprecated, they may stop working in the future.
+
+## Specifying dates
+Both `Dates.DateTime` objects and `String`s can be passed as values to the
+`starttime` and `endtime` keywords so long as they are valid.
+Examples include `"2000-01-01"` and `"2008-02-03T00:00:30"`.
 """
 struct IRISTimeSeries <: IRISRequest
     network::String
@@ -173,6 +184,8 @@ struct IRISTimeSeries <: IRISRequest
                             antialias, width, height, audiosamplerate, audiocompress, output,
                             format, process)
         location in ("  ", "") && (location = "--")
+        !ismissing(starttime) && (starttime = DateTime(starttime))
+        !ismissing(endtime) && (endtime = DateTime(endtime))
         !ismissing(starttime) && !ismissing(endtime) && starttime > endtime &&
             throw(ArgumentError("`starttime` must be before endtime"))
         coalesce(duration, 1) > 0 || throw(ArgumentError("`duration` must be positive"))
@@ -252,15 +265,25 @@ struct IRISTimeSeries <: IRISRequest
 end
 
 function IRISTimeSeries(;
+                        code=missing,
                         network=missing, station=missing, location=missing, channel=missing,
                         starttime=missing, endtime=missing, duration=missing, antialias=missing,
                         width=missing, height=missing, audiosamplerate=missing,
                         audiocompress=missing, output=missing, format=missing, kwargs...)
+    if !ismissing(code)
+        any(!ismissing, (network, station, location, channel)) &&
+            throw(ArgumentError("`code` cannot be provided with any of " *
+                                "`network`, `station`, `location`, or `channel`"))
+        network, station, location, channel = split_channel_code(code)
+    end
     any(ismissing, (network, station, location, channel, starttime)) &&
         throw(ArgumentError("network, station, location, channel and starttime, plus one of " *
                             "endtime or duration, must all be specified"))
     count(ismissing, (endtime, duration)) == 1 ||
         throw(ArgumentError("One and only one of `endtime` or `duration` must be specified"))
+    if ismissing(output) && ismissing(format)
+        format = "miniseed"
+    end
     process = OrderedDict{Symbol,Any}()
     for (k, v) in kwargs
         k in keys(IRISTimeSeries_PROCESSING_FIELDS) ||
@@ -272,8 +295,29 @@ function IRISTimeSeries(;
                    format, process)
 end
 
-# To be the same as the structs which use Parameters.@with_kw
-Base.show(io::IO, p::SeisRequests.IRISTimeSeries) = dump(IOContext(io, :limit => true), p, maxdepth=1)
+function Base.:(==)(r1::IRISTimeSeries, r2::IRISTimeSeries)
+    for f in fieldnames(IRISTimeSeries)
+        v1, v2 = getfield.((r1, r2), f)
+        # Special case as OrderedDicts compare as equal even with different
+        # orders of the keys!
+        if f === :process
+            length(v1) == length(v1) || return false
+            for ((key1, val1), (key2,val2)) in zip(v1, v2)
+                key1 === key2 || return false
+                val1 === val2 || return false
+            end
+        else
+            if v1 === missing || v2 === missing
+                v1 === v2 || return false
+            else
+                v1 == v2 || return false
+            end
+        end
+    end
+    true
+end
+
+Base.broadcastable(request::IRISTimeSeries) = Ref(request)
 
 service_string(::IRISTimeSeries) = "timeseries"
 
