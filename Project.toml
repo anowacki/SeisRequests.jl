@@ -1,7 +1,7 @@
 name = "SeisRequests"
 uuid = "37ba1d8a-44b2-5bbd-9814-465cdc1f4fb5"
 authors = ["Andy Nowacki <a.nowacki@leeds.ac.uk>"]
-version = "0.2.0"
+version = "0.2.2"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
