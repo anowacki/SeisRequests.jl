@@ -44,17 +44,17 @@ jobs:
       - name: Install unregistered dependencies (Unix)
         if: ${{ matrix.os != 'windows-latest' }}
         run: julia --project -e '
-          using Pkg
-          Pkg.add(PackageSpec(url="https://github.com/anowacki/Geodesics.jl"))
-          Pkg.add(PackageSpec(url="https://github.com/anowacki/StationXML.jl"))
+          using Pkg;
+          Pkg.add(PackageSpec(url="https://github.com/anowacki/Geodesics.jl"));
+          Pkg.add(PackageSpec(url="https://github.com/anowacki/StationXML.jl"));
           Pkg.add(PackageSpec(url="https://github.com/anowacki/Seis.jl"))'
       # Work around problems with quoting when using PowerShell on Windows by using cmd.exe
       - name: Install unregistered dependencies (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: julia --project -e "
-          using Pkg
-          Pkg.add(PackageSpec(url=\"https://github.com/anowacki/Geodesics.jl\"))
-          Pkg.add(PackageSpec(url=\"https://github.com/anowacki/StationXML.jl\"))
+          using Pkg;
+          Pkg.add(PackageSpec(url=\"https://github.com/anowacki/Geodesics.jl\"));
+          Pkg.add(PackageSpec(url=\"https://github.com/anowacki/StationXML.jl\"));
           Pkg.add(PackageSpec(url=\"https://github.com/anowacki/Seis.jl\"))"
         shell: cmd
       - uses: julia-actions/julia-buildpkg@v1
