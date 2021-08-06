@@ -234,6 +234,7 @@ for the broadband, high-sensitivity channels of station JSA in Jersey,
 Channel Islands
 ```
 julia> FDSNStation(network="GB", station="JSA", channel="BH?", level="response")
+```
 
 Every station known by the datacentre.  Here we use the `format="text"` option
 to get only the basic information on where stations are.  (Note that as of
