@@ -7,9 +7,18 @@ Currently implemented schemes are the FDSN Web Services specification, and IRIS'
 web services specification for data (timeseries).  Further specifications will
 be added in the future.
 
-To request data, create a one of the [FDSNRequest](@ref) types and use the
-[get_request](@ref) method on it.  This method returns a `HTTP.Message.Response`
-containing the raw response in the field `body`.
+Use one of the following high-level functions to get information on seismic stations,
+seismic events and data:
+- [`get_events`](@ref)
+- [`get_stations`](@ref)
+- [`get_data`](@ref)
+
+See the docstrings for more information.
+
+### Servers
+Inbuilt servers can be listed using [`server_list`](@ref).  Not all servers
+will return all kinds of information; for instance `"ISC"` only holds earthquake
+catalogues.
 
 ### Specifications
 
@@ -109,7 +118,7 @@ version_string(::SeisRequest) = "1"
 
 Return a URI for the request `r`, which can then be obtained via HTTP GET.
 
-`server` can either be a URI or one of the available servers.  (See [server_list](@ref).)
+`server` can either be a URI or one of the available servers.  (See [`server_list`](@ref).)
 """
 function request_uri(r::SeisRequest; server=DEFAULT_SERVER)
     uri = base_uri(r, server=server) * "?"
@@ -133,7 +142,7 @@ end
 
 Return a URI for the requests `rs`, which can then be obtained via HTTP POST.
 
-`server` can either be a URI or one of the available servers.  (See [server_list](@ref).)
+`server` can either be a URI or one of the available servers.  (See [`server_list`](@ref).)
 """
 post_uri(r::SeisRequest; server=DEFAULT_SERVER) = base_uri(r, server=server)
 
@@ -159,7 +168,7 @@ end
 
 Add a server with key `label` to the global list of servers.
 
-See also [server_list](@ref).
+See also: [`server_list`](@ref)
 """
 function add_server!(label, uri)
     label ∈ keys(SERVERS) && throw(ArgumentError("A server with label `$label` already exists"))
@@ -171,7 +180,7 @@ end
 
 Return a list of available servers for use with a `SeisRequest`.
 
-See also [add_server!](@ref).
+See also: [`add_server!`](@ref)
 """
 server_list() = collect(keys(SERVERS))
 
@@ -179,7 +188,7 @@ server_list() = collect(keys(SERVERS))
     get_request(r::SeisRequest; server=$(DEFAULT_SERVER), verbose=true) -> response::HTTP.Message.Response
 
 Return `response`, the result of requesting `r` via the HTTP GET command.  Optionally specify
-the server either by URI or one of the available servers.  (See [server_list](@ref).)
+the server either by URI or one of the available servers.  (See [`server_list`](@ref).)
 """
 function get_request(r::SeisRequest; server=DEFAULT_SERVER, verbose=true)
     uri = request_uri(r; server=server)

@@ -42,9 +42,17 @@ in which to search for the events or stations.  For details of all keywords
 which can be used, see the docstrings for `FDSNEvent`, `FDSNStation` and
 `FDSNDataSelect`.
 
+#### Servers
+SeisRequests knows about some servers with which it can communicate.  To
+see the list, call `SeisRequests.server_list()`.
+
+The server can be specified by either the server key (from `server_list`)
+or a full URL (like `"http://service.iris.edu"`) using the `server`
+keyword argument to the `get_*` functions.
+
 #### Example
-For example, let's try and find some data for the Cwmllynfell event in
-South Wales on 17 February 2018:
+For example, let's try and find some data for the [Cwmllynfell event in
+South Wales on 17 February 2018](http://www.earthquakes.bgs.ac.uk/earthquakes/recent_events/20180217142554.html#page=summary):
 
 ```julia
 julia> using SeisRequests, Dates
@@ -97,8 +105,9 @@ julia> stations = get_stations(event, code="GB.JSA.*.BH?")
 ```
 
 If we want to get some data from here, we can ask how long before and
-after the earthquake we want, the finally submit a request for some data.
-In this case, let's ask for 6 minutes (300 s) of data.
+after the earthquake we want, then finally submit a request for some data.
+In this case, let's ask for data starting 0 s (`Second(0)`) before and
+300 s (`Minute(6)`) after the earthquake.
 
 ```julia
 julia> data = get_data(event, stations, Second(0), Minute(6))
@@ -119,6 +128,10 @@ julia> plot(data)
 
 ![Cwmllynfell 2018-02-17 seismic event recorded at JSA, Jersey](docs/images/Cwmllynfell_JSA.png)
 
+To request data windows based on predicted seismic travel times, install
+[SeisTau.jl](https://github.com/anowacki/SeisTau.jl); see the docstring
+for `get_data` for details.
+
 
 ### Low-level interface
 The high-level functions work by calling the low-level interface, which
@@ -131,8 +144,8 @@ operates in this way:
   - Using the IRIS Web Services standard:
     - `IRISTimeSeries`: Request waveform data with preprocessing done
 3. Send that request to your preferred server with `get_request`, and
-   get back a `HTTP.Response`, containing the raw response in the `.body`
-   field.
+   get back a `HTTP.Message.Response`, containing the raw response in the
+   `.body` field.
 4. Process the raw output as needed.
 
 Each of the constructors has comprehensive documentation you can access
