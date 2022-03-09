@@ -267,5 +267,19 @@ using SeisRequests
             @test_throws ArgumentError convert(SeisRequests.FDSNEventTextResponse,
                 "usp000jv5f|2012-11-07T16:35:46.930|__XXX__|-91.895|24|us|us|us|usp000jv5f|mww|7.4|us|earthquake")
         end
+        @testset "Over-precise dates" begin
+            @test SeisRequests._parse(DateTime, "2000-01-01T00:00:00.123456789") ==
+                DateTime(2000, 1, 1, 0, 0, 0, 123)
+            @test SeisRequests._parse(DateTime, "2000-01-01T00:00:00.1235") ==
+                DateTime(2000, 1, 1, 0, 0, 0, 123)
+            @test convert(SeisRequests.FDSNChannelTextResponse,
+                "TA|A04A||BHZ|48.7197|-122.707001|23.0|0.0|0.0|-90.0|Streckeisen STS-2 G3/Quanterra 330 Linear Phase Co|6.27192E8|0.2|M/S|40.0|2004-09-19T23:45:00.0001|2005-10-16T02:09:59.0009") ==
+                SeisRequests.FDSNChannelTextResponse("TA", "A04A", "", "BHZ",
+                    48.7197, -122.707001, 23.0, 0.0, 0.0, -90.0,
+                    "Streckeisen STS-2 G3/Quanterra 330 Linear Phase Co",
+                    6.27192e8, 0.2, "M/S", 40.0,
+                    DateTime("2004-09-19T23:45:00"),
+                    DateTime("2005-10-16T02:09:59"))
+        end
     end
 end

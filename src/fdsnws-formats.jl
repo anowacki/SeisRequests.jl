@@ -26,11 +26,16 @@ function _parse(T, s)
     v
 end
 
+"Parsing of `DateTime`s truncates the timestamp to the nearest millisecond."
 function _parse(::Type{DateTime}, s)
     # Handle the fact that empty strings are always parsed as valid and
     # give you the date 0001-01-01!
     isempty(s) && return missing
-    DateTime(s)
+    # Remove any extra precision on the date; e.g. "2000-01-01T00:00:00.00000" -> "2000-01-01T00:00:00.000"
+    # Valid dates must be ASCII so an error on the following indexing expression is okay
+    # since it indicates invalid input
+    s′ = length(s) > 23 ? @view(s[begin:(begin+22)]) : s
+    DateTime(s′)
 end
 
 _parse(::Type{String}, s) = s

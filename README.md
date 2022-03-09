@@ -22,8 +22,12 @@ Add SeisRequests like so:
 ```julia
 julia> ] # Type ']' to enter pkg mode
 
-pkg> add https://github.com/anowacki/Geodesics.jl https://github.com/anowacki/Seis.jl https://github.com/anowacki/StationXML.jl https://github.com/anowacki/SeisRequests.jl
+pkg> add https://github.com/anowacki/Geodesics.jl https://github.com/anowacki/Seis.jl https://github.com/anowacki/SeisRequests.jl
 ```
+
+SeisRequests supports the latest
+[long-term support release of Julia](https://julialang.org/downloads/#long_term_support_release),
+requiring v1.6 or newer.
 
 ## Using
 
