@@ -16,7 +16,7 @@ StationXML = "bc702e9c-26b7-573b-a57f-23300c0e5013"
 
 [compat]
 DataStructures = "0.17, 0.18"
-DocStringExtensions = "0.8"
+DocStringExtensions = "0.8, 0.9"
 Geodesics = "0.2"
 HTTP = "0.8, 0.9"
 Parameters = "0.12"
