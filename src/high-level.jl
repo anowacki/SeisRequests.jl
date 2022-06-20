@@ -774,8 +774,8 @@ function parse_data_response(T, requests::AbstractArray{<:SeisRequest},
     format = first(requests).format
     if format === missing || format == "miniseed"
         _check_content_type(response, "application/vnd.fdsn.mseed")
-        traces = Seis.read_mseed(Seis.Trace{T, Vector{T}, Seis.Geographic{T}},
-            response.body)
+        traces = Seis.read_mseed(response.body,
+            Seis.Trace{T, Vector{T}, Seis.Geographic{T}})
     else
         error("format \"$(format)\" is currently unsupported")
     end

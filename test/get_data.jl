@@ -76,8 +76,8 @@ using Dates: DateTime, Minute, Second
                 @test channel_code(out[1]) == "GB.CWF..BHZ"
                 @test channel_code(out[2]) == "GB.CWF..HHZ"
                 @test all(out.meta.server .== server)
-                t = Seis.read_mseed(Seis.Trace{T, Vector{T}, Seis.Geographic{T}},
-                    mseed_file)
+                t = Seis.read_mseed(mseed_file,
+                    Seis.Trace{T, Vector{T}, Seis.Geographic{T}})
                 t.meta.mseed_file = missing
                 t.meta.server = server
                 @test out == t
