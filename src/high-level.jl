@@ -311,16 +311,16 @@ and defaults to `Float64` if this function is called from
 [`get_stations`](@ref).
 """
 function parse_station_response(T, request::FDSNStation, response, server)
-    str = String(response.body)
-    content_type = HTTP.Messages.header(response, "Content-Type")
     station_type = GeogStation{T}
     # No results
     if response.status == request.nodata
-        isempty(str) || @warn("unexpected data in response reporting no data")
+        isempty(response.body) || @warn("unexpected data in response reporting no data")
         return station_type[]
-    elseif isempty(str)
+    elseif isempty(response.body)
         error("empty response but server did not indicate no data")
     end
+    # Parse as string
+    str = String(response.body)
     # If asked for a text format, parse that internally
     if coalesce(request.format, "") == "text"
         _check_content_type(response, "text/plain")
@@ -882,14 +882,16 @@ the server's response to the request, and `server` specifies which server
 the request was sent to.
 """
 function parse_event_response(T::DataType, request::FDSNEvent, response, server)
-    str = String(response.body)
     event_type = GeogEvent{T}
+    # No results
     if response.status == request.nodata
-        isempty(str) || @warn("unexpected data in response reporting no data")
+        isempty(response.body) || @warn("unexpected data in response reporting no data")
         return event_type[]
-    elseif isempty(str)
+    elseif isempty(response.body)
         error("empty response but server did not indicate no data")
     end
+    # Parse as string
+    str = String(response.body)
     # If have requested text format, then parse that internally
     if coalesce(request.format, "") == "text"
         _check_content_type(response, "text/plain")
