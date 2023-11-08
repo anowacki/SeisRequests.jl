@@ -45,9 +45,9 @@ export
 
 using Dates
 
-using HTTP
+import HTTP
 using DataStructures: OrderedDict
-using Parameters
+using Parameters: @with_kw
 import QuakeML
 import Seis
 using Seis: GeogEvent, GeogStation
