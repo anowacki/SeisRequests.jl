@@ -40,6 +40,7 @@ export
     get_events,
     get_request,
     get_stations,
+    get_stations!,
     server_list
 
 using Dates

@@ -220,12 +220,13 @@ If no data are found for one or more stations, a warning is printed but
 the function does not throw an error.
 
 # Example
+Fill in data for two stations recording on 1 January 2000.
 ```
-julia> using Seis
+julia> using Seis: Station
 
-julia> stas = [Station(net="II", sta="ALE", loc="", cha="BHZ"), Station(net="IU", sta="XMAS", loc="00", cha="BHZ")]
+julia> stas = [Station(net="II", sta="ALE", loc="00", cha="BHZ"), Station(net="IU", sta="XMAS", loc="00", cha="BHZ")]
 
-julia> get_stations!([sta])
+julia> get_stations!(stas, starttime="2000-01-01", endtime="2000-01-02")
 ```
 """
 function get_stations!(stations::AbstractArray{<:Seis.GeogStation};
@@ -239,7 +240,7 @@ function get_stations!(stations::AbstractArray{<:Seis.GeogStation};
              station=s.sta,
              location=s.loc,
              channel=s.cha,
-             # Use 1-01-01T00:00:00 and 9999-01-01T00:00:00 as impossibly small and
+             # Use 1800-01-01T00:00:00 and 4000-01-01T00:00:00 as impossibly small and
              # large dates, since typemax/typemin values are too large to be
              # parsed by most servers
              starttime=coalesce(s.meta.startdate, DateTime(1800)),
