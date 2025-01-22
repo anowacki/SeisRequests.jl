@@ -59,6 +59,14 @@ If you use the `code` keyword argument to specify the stations for which to
 search (e.g., `code="XM.A*..*Z"`; see [`FDSNStation`](@ref)), then `level`
 is automatically set to `"channel"`.  Override this if desired by passing
 a value to `level` explicitly.
+
+# List of fields added to `station.meta`:
+- `:burial_depth`: Burial depth of station/channel in m (if available; otherwise `missing`)
+- `:startdate`: Start recording date of network/station/channel (if available; otherwise `missing`)
+- `:enddate`: End recording date of network/station/channel (if available; otherwise `missing`)
+- `:stationxml`: Full StationXML metadata for network/station/channel
+- `:server`: Name of server from which station metadata was retrieved
+- `:request`: Original `SeisRequests.Request` used to retrieve station metadata
 """
 function get_stations(; server=DEFAULT_SERVER, verbose=true, T=Float64, kwargs...)
     request = FDSNStation(; kwargs...)
@@ -396,11 +404,12 @@ function parse_stations(T, request, fdsn_stations::AbstractArray{FDSNStationText
     stations
 end
 
-function parse_stations(T, request, fdsn_channels::AbstractArray{FDSNChannelTextResponse},
-        server)
-    stations = similar(Vector{T}, axes(fdsn_channels))
+function parse_stations(S::Type{<:Seis.Station{T}}, request,
+    fdsn_channels::AbstractArray{FDSNChannelTextResponse}, server
+) where T
+    stations = similar(Vector{S}, axes(fdsn_channels))
     for (i, c) in enumerate(fdsn_channels)
-        stations[i] = T(;
+        stations[i] = S(;
             net=c.network,
             sta=c.station,
             loc=c.location,
@@ -408,10 +417,10 @@ function parse_stations(T, request, fdsn_channels::AbstractArray{FDSNChannelText
             lon=c.longitude,
             lat=c.latitude,
             elev=c.elevation,
-            dep=c.depth/1000,
             azi=c.azimuth,
             inc=c.dip+90,
             meta=Dict{Symbol,Any}(
+                :burial_depth=>T(c.depth),
                 :sensor_description=>c.sensor_description,
                 :scale=>c.scale,
                 :scale_frequency=>c.scale_frequency,
@@ -428,22 +437,26 @@ function parse_stations(T, request, fdsn_channels::AbstractArray{FDSNChannelText
 end
 
 """
-    parse_stations(T, request, stationxml::FDSNStationXML, server)
+    parse_stations(S, request, stationxml::FDSNStationXML, server) -> stations::S[]
 
-Create stations from an FDSNStationXML object.
+Create stations of type `S` from an FDSNStationXML object.
 
 Several fields in each station's `.meta` field are filled, including
 the `stationxml` field which contains a full `FDSNStationXML` object
 for that network/channel/station (depending on the request `level`), but
 only for the network/station/channel in question.
 
+If the `request` is only for `level="network"`, then `stations` only
+contains information about networks and only the `station.net` code is
+filled.
+
 This method is usually called by [`SeisRequests.parse_station_response`](@ref).
 """
-function parse_stations(T, request, stationxml::FDSNStationXML, server)
-    stations = T[]
+function parse_stations(S::Type{<:Seis.Station{T}}, request, stationxml::FDSNStationXML, server) where T
+    stations = S[]
     for network in stationxml.network
         if request.level !== missing && request.level == "network"
-            net = T(net=network.code)
+            net = S(net=network.code)
             net.meta.startdate = network.start_date
             net.meta.enddate = network.end_date
             net.meta.stationxml = filter_stationxml(stationxml, network)
@@ -455,9 +468,10 @@ function parse_stations(T, request, stationxml::FDSNStationXML, server)
 
         for station in network.station
             if request.level === missing || request.level == "station"
-                sta = T(net=network.code, sta=station.code,
-                    lon=station.longitude, lat=station.latitude,
-                    elev=station.elevation)
+                sta = S(net=network.code, sta=station.code,
+                    lon=station.longitude.value, lat=station.latitude.value,
+                    elev=station.elevation.value
+                )
                 sta.meta.startdate = station.start_date
                 sta.meta.enddate = station.end_date
                 sta.meta.stationxml = filter_stationxml(stationxml, network, station)
@@ -469,14 +483,17 @@ function parse_stations(T, request, stationxml::FDSNStationXML, server)
 
             for channel in station.channel
                 # Fill in information which may need adjusting first
-                cha = T(net=network.code, sta=station.code,
+                cha = S(net=network.code, sta=station.code,
                     loc=channel.location_code, cha=channel.code,
-                    lon=channel.longitude, lat=channel.latitude,
-                    elev=channel.elevation, dep=channel.depth,
-                    azi=channel.azimuth, inc=channel.dip)
+                    lon=_getifnotmissing(T, channel.longitude, :value),
+                    lat=_getifnotmissing(T, channel.latitude, :value),
+                    elev=_getifnotmissing(T, channel.elevation, :value),
+                    azi=_getifnotmissing(T, channel.azimuth, :value),
+                    inc=_getifnotmissing(T, channel.dip, :value)
+                )
                 # Then adjust information by converting to correct units, etc.
-                cha.dep = cha.dep/1000
                 cha.inc = cha.inc + 90
+                cha.meta.burial_depth = _getifnotmissing(T, channel.depth, :value)
                 cha.meta.startdate = channel.start_date
                 cha.meta.enddate = channel.end_date
                 cha.meta.stationxml = filter_stationxml(stationxml, network, station, channel)
@@ -1003,8 +1020,10 @@ function parse_events(T, request, quakeml_events::QuakeML.EventParameters, serve
     events
 end
 
-"Return `missing` if `val.field` is `missing`, and its value otherwise."
+"Return `missing` if `val is `missing`, and `val.field` otherwise."
 _getifnotmissing(val, field) = val === missing ? missing : getfield(val, field)
+"Return `missing` if `val` is missing, and `T(val.field)` otherwise."
+_getifnotmissing(T, val, field) = val === missing ? missing : T(getfield(val, field))
 
 """
     _check_content_type(response, expected; allowempty=true) -> nothing
