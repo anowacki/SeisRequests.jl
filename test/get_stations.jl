@@ -186,30 +186,31 @@ end
                     """
                 @testset "Eltype $T" for T in (Float32, Float64)
                     response = HTTP.Messages.Response(SUCCESS, body)
-                    out = SeisRequests.parse_station_response(Float64, request, response,
+                    out = SeisRequests.parse_station_response(T, request, response,
                         server)
-                    @test out isa Vector{Seis.GeogStation{Float64}}
+                    @test out isa Vector{Seis.GeogStation{T}}
                     @test length(out) == 2
-                    out_true = [Seis.GeogStation{Float64}(net="IU", sta="COLA",
+                    out_true = [Seis.GeogStation{T}(net="IU", sta="COLA",
                             loc="20", cha="HNE", lat=64.873599, lon=-147.8616, elev=200,
-                            dep=0, azi=90, inc=90, meta=Dict(
+                            azi=90, inc=90, meta=Dict(
+                                :burial_depth=>T(0),
                                 :sensor_description=>"Kinemetrics FBA-23 Low-GainSensor",
                                 :scale=>53687.1, :scale_frequency=>1.0,
                                 :scale_units=>"M/S**2", :sample_rate=>80.0,
                                 :startdate=>DateTime(2005, 9, 28, 22),
                                 :enddate=>DateTime(2009, 7, 8, 22),
                                 :server=>server)),
-                        Seis.GeogStation{Float64}(net="IU", sta="COLA",
+                        Seis.GeogStation{T}(net="IU", sta="COLA",
                             loc="20", cha="HNN", lat=64.873599, lon=-147.8616, elev=200,
-                            dep=0, azi=0, inc=90, meta=Dict(
+                            azi=0, inc=90, meta=Dict(
+                                :burial_depth=>T(0),
                                 :sensor_description=>"Kinemetrics FBA-23 Low-GainSensor",
                                 :scale=>53687.1, :scale_frequency=>1.0,
                                 :scale_units=>"M/S**2", :sample_rate=>80.0,
                                 :startdate=>DateTime(2005, 9, 28, 22),
                                 :server=>server))]
                     for (o, ot) in zip(out, out_true)
-                        # `collect(propertynames(o))` for compatibility with Julia v1.2
-                        @testset "Field: $f" for f in filter(x->x∉(:pos, :meta), collect(propertynames(o)))
+                        @testset "Field: $f" for f in filter(x->x∉(:pos, :meta), propertynames(o))
                             @test getproperty(o, f) === getproperty(ot, f)
                         end
                         @testset "Key: $k" for (k, v) in o.meta
@@ -291,9 +292,10 @@ end
                     sxml′_filtered = deepcopy(sxml′)
                     pop!(sxml′_filtered.network[1].station[1].channel)
                     @test out[1] == Seis.GeogStation{T}(net="AN", sta="FAKE",
-                        loc="", cha="UHT", lon=10, lat=20, elev=30, dep=0.04,
+                        loc="", cha="UHT", lon=10, lat=20, elev=30,
                         azi=100, inc=100,
-                        meta=Dict(:startdate=>DateTime(2002), :stationxml=>sxml′_filtered,
+                        meta=Dict(:burial_depth=>T(40),
+                            :startdate=>DateTime(2002), :stationxml=>sxml′_filtered,
                             :server=>server, :request=>request))
                 end
             end            
@@ -328,7 +330,8 @@ end
             @test length(stas) == 2
             @test stas[1] == Seis.GeogStation{Float64}(net="GB", sta="JSA", loc="",
                 cha="BHZ", lon=-2.171698, lat=49.187801, elev=39.0,
-                azi=0, inc=0, dep=0, meta=Dict(
+                azi=0, inc=0, meta=Dict(
+                    :burial_depth=>0.0,
                     :startdate=>DateTime(2007, 9, 6),
                     :sensor_description=>"TR-240", :sample_rate=>50.0,
                     :scale_units=>"M/S", :scale_frequency=>1,
@@ -360,6 +363,53 @@ end
                 stas′ = get_stations(evt, -Millisecond(100), Second(60), network="US",
                     maxradius=10, verbose=false)
                 @test all(stations_equal.(stas, stas′))
+            end
+        end
+    end
+
+    @testset "get_stations!" begin
+        @testset "assign_stations!" begin
+            
+        end
+
+        @testset "Real requests" begin
+            stas = [
+                Station(; net="XM", sta="A01E", loc="", cha) for cha in ("HHE", "HHN")
+            ]
+            stas.meta.startdate = DateTime(2012)
+            stas.meta.enddate = DateTime(2015)
+
+            stas = get_stations!(stas)
+            stas2 = get_stations(network="XM", station="A01E",
+                location="", channel="HHE,HHN",
+                starttime=DateTime(2012), endtime=DateTime(2015)
+            )
+            # There is no `module_uri` in the StationXML of the `get_stations!`
+            # output because we POST the request instead, and likewise
+            # `meta.request` and `meta.stationxml.created` will be different
+            # so we need to test all the fields apart from those.
+            @testset "$(Seis.channel_code(stest))" for (stest, strue) in zip(stas, stas2)
+                @testset "Property $p" for p in filter(!in((:meta, :dep)), (propertynames(stest)))
+                    @test getproperty(stest, p) == getproperty(strue, p)
+                end
+
+                @testset "Same meta keys" begin
+                    @test keys(stest.meta) == keys(strue.meta)
+                end
+
+                @testset "meta.$key" for key in keys(stest.meta)
+                    if !(key in (:request, :stationxml))
+                        @test stest.meta[key] == strue.meta[key]
+                    elseif key == :stationxml
+                        @testset "FDSNStationXML.$f" for f in filter(
+                            !in((:module_uri, :created)),
+                            fieldnames(StationXML.FDSNStationXML)
+                        )
+                            @test getproperty(stest.meta.stationxml, f) ==
+                                getproperty(strue.meta.stationxml, f)
+                        end
+                    end
+                end
             end
         end
     end
