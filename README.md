@@ -33,12 +33,13 @@ requiring v1.6 or newer.
 
 ### High-level interface
 If you just want to get earthquake parameters, station metadata or raw
-seismic data, use the high-level interface, which offers three main
+seismic data, use the high-level interface, which offers four main
 functions:
 - `get_events`, to return `Seis.Event`s with information about seismic
   events in various catalogues.
 - `get_stations`, to return `Seis.Station`s with metadata about seismic
   sensors.
+- `get_stations!`, to fill in missing metadata for a set of `Seis.Station`s.
 - `get_data`, to return `Seis.Trace`s with raw seismic data.
 
 Each of these accept keyword arguments to define the region of interest
