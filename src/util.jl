@@ -31,3 +31,21 @@ function split_channel_code(code)
         throw(ArgumentError("incorrect number of fields in code \"$code\""))
     (network=tokens[1], station=tokens[2], location=tokens[3], channel=tokens[4])
 end
+
+"""
+    _error_on_control_characters(uri)
+
+Throws an `ArgumentError` if the string `uri` contains an illegal control
+character, and otherwise returns `nothing`.
+"""
+function _error_on_control_characters(uri)
+    for control_char in ('\r', '\n')
+        if control_char in uri
+            throw(ArgumentError(
+                "string contains illegal control character '$control_char'"
+            ))
+        end
+    end
+
+    nothing
+end
