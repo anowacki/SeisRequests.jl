@@ -12,4 +12,11 @@ using Dates: Second, Millisecond
         @test_throws ArgumentError SeisRequests.split_channel_code("A.B.C.D.")
         @test_throws ArgumentError SeisRequests.split_channel_code("A.B.C")
     end
+
+    @testset "_error_on_control_characters" begin
+        @test_throws ArgumentError SeisRequests._error_on_control_characters("https://example.com/\r")
+        @test_throws ArgumentError SeisRequests._error_on_control_characters("https://example.com/\n")
+        @test_throws ArgumentError SeisRequests._error_on_control_characters("https://example.com/\r\nHTTP")
+        @test isnothing(SeisRequests._error_on_control_characters("https://example.com/HTTP"))
+    end
 end

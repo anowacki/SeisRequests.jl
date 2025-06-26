@@ -193,6 +193,8 @@ the server either by URI or one of the available servers.  (See [`server_list`](
 """
 function get_request(r::SeisRequest; server=DEFAULT_SERVER, verbose=true)
     uri = request_uri(r; server=server)
+    # Mitigate against CRLF injection (CVE-2025-52479): https://nvd.nist.gov/vuln/detail/CVE-2025-52479
+    _error_on_control_characters(uri)
     response = HTTP.request("GET", uri)
     status_text = STATUS_CODES[response.status]
     if verbose
@@ -220,6 +222,8 @@ function post_request(rs::AbstractArray{T};
     end
     body = post_string(rs)
     uri = post_uri(first(rs); server=server)
+    # Mitigate against CRLF injection (CVE-2025-52479): https://nvd.nist.gov/vuln/detail/CVE-2025-52479
+    _error_on_control_characters(uri)
     # FIXME: Currently IRIS doesn't support a `nodata` line in POST requests
     #        so do not include that for compatibility and simply warn
     #        if nodata != 204.
