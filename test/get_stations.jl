@@ -326,15 +326,16 @@ end
         # Request with only keyword arguments forwarded to FDSNStation
         @testset "Simple" begin
             stas = get_stations(network="GB", station="J*", channel="?HZ",
-                    level="channel", format="text", verbose=false)
+                    location="", level="channel", format="text", verbose=false)
             @test length(stas) == 2
             @test stas[1] == Seis.GeogStation{Float64}(net="GB", sta="JSA", loc="",
-                cha="BHZ", lon=-2.171698, lat=49.187801, elev=39.0,
+                cha="BHZ", lon=-2.17167, lat=49.18783, elev=39.0,
                 azi=0, inc=0, meta=Dict(
                     :burial_depth=>0.0,
                     :startdate=>DateTime(2007, 9, 6),
-                    :sensor_description=>"TR-240", :sample_rate=>50.0,
-                    :scale_units=>"M/S", :scale_frequency=>1,
+                    :enddate=>DateTime(2025, 02, 06),
+                    :sensor_description=>"", :sample_rate=>50.0,
+                    :scale_units=>"m/s", :scale_frequency=>1,
                     :scale=>4.79174e8, :server=>"IRIS"))
         end
 
