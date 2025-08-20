@@ -15,7 +15,7 @@ Seis = "dd80f4d8-c2f6-58bd-9bd3-4635f134261d"
 StationXML = "bc702e9c-26b7-573b-a57f-23300c0e5013"
 
 [compat]
-DataStructures = "0.17, 0.18"
+DataStructures = "0.17, 0.18, 0.19"
 DocStringExtensions = "0.8, 0.9"
 Geodesics = "0.2"
 HTTP = "0.8, 0.9, 1.0.2"
