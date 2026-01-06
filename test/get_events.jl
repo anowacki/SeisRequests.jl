@@ -351,7 +351,7 @@ import QuakeML
                     :contributor_id=>"us60003sc0,at00ps3pco,pt19146001",
                     :contributor=>"us", :author=>"at,pt,us",
                     :mag_type=>"Mww", :mag_author=>"us", :mag=>8.0,
-                    :location_name=>"NORTHERN PERU", :server=>"IRIS"))
+                    :location_name=>"NORTHERN PERU", :server=>"Earthscope"))
         end
 
         @testset "Station" begin

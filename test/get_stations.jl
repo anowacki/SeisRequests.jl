@@ -336,7 +336,7 @@ end
                     :enddate=>DateTime(2025, 02, 06),
                     :sensor_description=>"", :sample_rate=>50.0,
                     :scale_units=>"m/s", :scale_frequency=>1,
-                    :scale=>4.79174e8, :server=>"IRIS"))
+                    :scale=>4.79174e8, :server=>"Earthscope"))
         end
 
         @testset "Event" begin

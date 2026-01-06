@@ -47,7 +47,7 @@ using SeisRequests
             @test SeisRequests.protocol_string(req) == "fdsnws"
             @test SeisRequests.service_string(req) == "event"
             @test SeisRequests.request_uri(req) == 
-                "http://service.iris.edu/fdsnws/event/1/query?" *
+                "https://service.earthscope.org/fdsnws/event/1/query?" *
                 "starttime=2000-01-01T00:00:00&endtime=2000-01-02T00:00:00&" *
                 "latitude=15.0&longitude=45.0&maxradius=5.0&minmagnitude=4.0&" *
                 "nodata=204"
@@ -102,7 +102,7 @@ using SeisRequests
             @test SeisRequests.protocol_string(req) == "fdsnws"
             @test SeisRequests.service_string(req) == "dataselect"
             @test SeisRequests.request_uri(req) == 
-                "http://service.iris.edu/fdsnws/dataselect/1/query?" *
+                "https://service.earthscope.org/fdsnws/dataselect/1/query?" *
                 "starttime=2000-01-01T00:00:00&endtime=2000-01-01T00:00:01&" *
                 "network=IU&station=ANMO&location=*&channel=BH?&nodata=204"
             # Get request: will fail if IRISWS not working for some reason
@@ -168,7 +168,7 @@ using SeisRequests
             @test SeisRequests.protocol_string(req) == "fdsnws"
             @test SeisRequests.service_string(req) == "station"
             @test SeisRequests.request_uri(req) == 
-                "http://service.iris.edu/fdsnws/station/1/query?" *
+                "https://service.earthscope.org/fdsnws/station/1/query?" *
                 "network=GB&station=JSA&location=--&channel=?H?&level=channel&" *
                 "format=text&nodata=204"
             # Get request: will fail if IRISWS not working for some reason

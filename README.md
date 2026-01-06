@@ -9,7 +9,7 @@ Gather seismic data and metadata from web services using Julia.
 
 SeisRequests allows you to easily create and submit a request for seismic data
 to any server round the world which supports either the FDSN
-or IRIS web services specifications.  Examples include [IRIS](https://iris.edu)
+or IRIS web services specifications.  Examples include [Earthscope](https://earthscope.org) (formerly IRIS)
 itself and the EU's data repository [Orfeus](https://www.orfeus-eu.org).
 
 You can search for seismic waveform data, earthquake locations and station
@@ -52,7 +52,7 @@ SeisRequests knows about some servers with which it can communicate.  To
 see the list, call `SeisRequests.server_list()`.
 
 The server can be specified by either the server key (from `server_list`)
-or a full URL (like `"http://service.iris.edu"`) using the `server`
+or a full URL (like `"https://service.earthscope.org"`) using the `server`
 keyword argument to the `get_*` functions.
 
 #### Example
