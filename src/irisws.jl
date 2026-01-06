@@ -38,7 +38,7 @@ const IRISTimeSeries_FORMAT_TYPES = ("ascii1", "ascii2", "ascii", "geocsv", "geo
 """
     IRISTimeSeries
 
-Create an data query which can be sent to a datacentre which implements the IRIS
+Create a data query which can be sent to a datacentre which implements the IRIS
 Web Services timeseries specification.
 
 ## Available options
@@ -116,7 +116,7 @@ because each filter operation is performed in the order given.
   conversion.  `units` can only be used with `correct`.
 - `diff`: Differentiate using 2 point (uncentered) method. `true` or `false` (default `false`)
 - `int`: Integrate using trapezoidal (midpoint) method. `true` or `false` (default `false`)
-- `decimate`: Sample-rate to decimate to. See [online help](http://service.iris.edu/irisws/timeseries/docs/1/help/#deci)
+- `decimate`: Sample-rate to decimate to. See [online help](https://service.earthscope.org/irisws/timeseries/docs/1/help/#deci)
   for more details. A linear-phase, anti-alias filter is applied during decimation.
 
 ### Plot Options

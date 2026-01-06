@@ -85,7 +85,7 @@ using SeisRequests
                 @test SeisRequests.protocol_string(req) == "irisws"
                 @test SeisRequests.service_string(req) == "timeseries"
                 @test SeisRequests.request_uri(req) == 
-                    "http://service.iris.edu/irisws/timeseries/1/query?" *
+                    "https://service.earthscope.org/irisws/timeseries/1/query?" *
                     "network=IU&station=ANMO&location=00&channel=BHZ&" *
                     "starttime=2000-01-01T00:00:00&endtime=2000-01-01T00:00:01&" *
                     "format=miniseed&int=true"

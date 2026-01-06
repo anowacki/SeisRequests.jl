@@ -26,7 +26,7 @@ FDSN Web Services request specification:
     http://www.fdsn.org/webservices/FDSN-WS-Specifications-1.1.pdf
 
 Details on IRISWS timeseries can be found at:
-    https://service.iris.edu/irisws/timeseries/1/
+    https://service.earthscope.org/irisws/timeseries/1/
 """
 module SeisRequests
 
@@ -57,10 +57,11 @@ using StationXML: FDSNStationXML
 
 "URIs of servers to which requests can be sent by key"
 const SERVERS = Dict{String,String}(
+    "Earthscope" => "https://service.earthscope.org",
     "Geofon" => "http://geofon.gfz-potsdam.de",
     "INGV" => "http://webservices.ingv.it",
     "IPGP" => "http://ws.ipgp.fr",
-    "IRIS" => "http://service.iris.edu",
+    "IRIS" => "https://service.earthscope.org",
     "ISC" => "http://www.isc.ac.uk",
     "NCEDC" => "http://service.ncedc.org",
     "NEIC" => "http://earthquake.usgs.gov",
@@ -68,7 +69,7 @@ const SERVERS = Dict{String,String}(
     "SCEDC" => "http://service.scedc.caltech.edu",
     )
 
-const DEFAULT_SERVER = "IRIS"
+const DEFAULT_SERVER = "Earthscope"
 
 "Dict describing the common HTTP status codes returned by FDSN services"
 const STATUS_CODES = Dict{Int,String}(
@@ -151,7 +152,7 @@ post_uri(r::SeisRequest; server=DEFAULT_SERVER) = base_uri(r, server=server)
     base_uri(request::SeisRequest, server=$(DEFAULT_SERVER)) -> uri
 
 Return the base URI for the `request`, which will look something like
-`http://service.iris.edu/fdsnws/station/1/query`.
+`https://service.earthscope.org/fdsnws/station/1/query`.
 
 Note that the `query` part is included.
 """
