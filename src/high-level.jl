@@ -843,7 +843,7 @@ end
 #
 
 """
-    get_events(; server=$(DEFAULT_SERVER), verbose=true, T=Float64, kwargs...) -> events
+    get_events(; server=$(DEFAULT_EVENT_SERVER), verbose=true, T=Float64, kwargs...) -> events
 
 Query `server` for events matching those specified in `kwargs`.
 `events` is a `Vector{Seis.GeogEvent{T}}`, where various useful
@@ -853,8 +853,11 @@ For search options, see [`FDSNEvent`](@ref).
 
 The element type of the `Seis.Event`s returned is set by `T`.
 """
-function get_events(; server=DEFAULT_SERVER, verbose=true, T=Float64, kwargs...)
-    request = FDSNEvent(; kwargs...)
+function get_events(; server=DEFAULT_EVENT_SERVER, verbose=true, T=Float64, kwargs...)
+    # Use 1800-01-01T00:00:00 and 4000-01-01T00:00:00 as impossibly small and
+    # large dates, since typemax/typemin values are too large to be
+    # parsed by most servers.  These will be overridden if set in `kwargs`
+    request = FDSNEvent(; starttime="1800-01-01", endtime="4000-01-01", kwargs...)
     response = get_request(request; server=server, verbose=verbose)
     events = parse_event_response(T, request, response, server)
 end
@@ -1036,6 +1039,8 @@ not throw.
 function _check_content_type(response, expected; allowempty=true)
     content_type = HTTP.Messages.header(response, "Content-Type")
     allowempty && isempty(content_type) && return
+    # Only warn on non-UTF-8 charsets
+    content_type = replace(content_type, "; charset=utf-8"=>"")
     content_type != expected &&
         @warn("content type of response is \"$content_type\", " *
               "not \"$expected\" as expected")

@@ -69,7 +69,11 @@ const SERVERS = Dict{String,String}(
     "SCEDC" => "http://service.scedc.caltech.edu",
     )
 
+"Default server for station and waveform requests"
 const DEFAULT_SERVER = "Earthscope"
+
+"Default server for event requests"
+const DEFAULT_EVENT_SERVER = "NEIC"
 
 "Dict describing the common HTTP status codes returned by FDSN services"
 const STATUS_CODES = Dict{Int,String}(
