@@ -343,15 +343,16 @@ import QuakeML
             evts = get_events(starttime="2019-01-01", endtime="2020-01-01",
                 minmagnitude=7.5, format="text", verbose=false)
             @test length(evts) == 3
-            @test evts[1] == Event(lon=-75.2775, lat=-5.8132, dep=122.4,
-                time=DateTime(2019, 05, 26, 07, 41, 15),
-                id="11041250",
+            @test evts[1] == Event(lon=-75.2697, lat=-5.8119, dep=122.57,
+                time=DateTime(2019, 05, 26, 07, 41, 15, 073),
+                id="us60003sc0",
                 meta=Dict(
-                    :catalog=>"NEIC PDE",
-                    :contributor_id=>"us60003sc0,at00ps3pco,pt19146001",
-                    :contributor=>"us", :author=>"at,pt,us",
-                    :mag_type=>"Mww", :mag_author=>"us", :mag=>8.0,
-                    :location_name=>"NORTHERN PERU", :server=>"Earthscope"))
+                    :catalog=>"us",
+                    :contributor_id=>"us60003sc0",
+                    :contributor=>"us", :author=>"us",
+                    :mag_type=>"mww", :mag_author=>"us", :mag=>8.0,
+                    :location_name=>"78 km NE of Navarro, Peru",
+                    :server=>SeisRequests.DEFAULT_EVENT_SERVER))
         end
 
         @testset "Station" begin
