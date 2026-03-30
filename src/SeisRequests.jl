@@ -233,9 +233,9 @@ function post_request(rs::AbstractArray{T};
     #        so do not include that for compatibility and simply warn
     #        if nodata != 204.
     #        Other datacentres *do* allow this.
-    if server == "IRIS" || server == SERVERS["IRIS"]
+    if server in ("Earthscope", "IRIS") || server == SERVERS["Earthscope"]
         first(rs).nodata != 204 &&
-            @warn("IRIS does not support setting the nodata field in POST " *
+            @warn("Earthscope does not support setting the nodata field in POST " *
                   "requests, but it has a non-default value for this request.")
         body = replace(body, r"^\s*nodata=.*\n"=>"")
     end
