@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/anowacki/SeisRequests.jl/compare/v0.3.1...v0.3.2) - 2025-06-26
+
+### Nonbreaking changes
+- Change the default server to use for event requests
+- Set default begin time to 1800-01-01 and end time to 4000-01-01 for event requests
+
+
 ## [0.3.1](https://github.com/anowacki/SeisRequests.jl/compare/v0.3.0...v0.3.1) - 2025-06-26
 
 ### Bugfixes
