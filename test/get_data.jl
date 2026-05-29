@@ -12,7 +12,7 @@ using Dates: DateTime, Minute, Second
     @testset "parse_data_response" begin
         @testset "No response" begin
             request = FDSNDataSelect()
-            response = HTTP.Messages.Response(request.nodata)
+            response = HTTP.Response(request.nodata)
             @test SeisRequests.parse_data_response(Float64, request, response, server) == []
 
             @testset "Eltype $T" for T in (Float32, Float64)
@@ -25,14 +25,14 @@ using Dates: DateTime, Minute, Second
                 ) SeisRequests.parse_data_response(Float64, request, response, server) == [])
 
             request = FDSNDataSelect(nodata=404)
-            response = HTTP.Messages.Response(request.nodata)
+            response = HTTP.Response(request.nodata)
             @test SeisRequests.parse_data_response(Float64, request, response, server) == []
         end
     end
 
     @testset "'Success' but no data" begin
         request = FDSNDataSelect()
-        response = HTTP.Messages.Response(SUCCESS)
+        response = HTTP.Response(SUCCESS)
         @test_throws ErrorException SeisRequests.parse_data_response(Float64, request,
             response, server)
     end
@@ -42,9 +42,9 @@ using Dates: DateTime, Minute, Second
             request = FDSNDataSelect()
 
             @testset "Wrong" begin
-                response_correct = HTTP.Messages.Response(SUCCESS,
+                response_correct = HTTP.Response(SUCCESS,
                     Dict("Content-Type"=>"application/vnd.fdsn.mseed"), body=data)
-                response_type_wrong = HTTP.Messages.Response(SUCCESS,
+                response_type_wrong = HTTP.Response(SUCCESS,
                     Dict("Content-Type"=>"WRONG"), body=data)
                 @test (@test_logs (:warn, "content type of response is \"WRONG\", " *
                                           "not \"application/vnd.fdsn.mseed\" as expected"
@@ -53,9 +53,9 @@ using Dates: DateTime, Minute, Second
             end
 
             @testset "Empty" begin
-                response_correct = HTTP.Messages.Response(SUCCESS,
+                response_correct = HTTP.Response(SUCCESS,
                     Dict("Content-Type"=>"application/vnd.fdsn.mseed"), body=data)
-                response_type_empty = HTTP.Messages.Response(SUCCESS,
+                response_type_empty = HTTP.Response(SUCCESS,
                     Dict(), body=data)
                 @test SeisRequests.parse_data_response(Float64, request,
                         response_type_empty, server) ==
@@ -68,7 +68,7 @@ using Dates: DateTime, Minute, Second
         @testset "Miniseed" begin
             request = FDSNDataSelect()
             @testset "Eltype $T" for T in (Float32, Float64)
-                response = HTTP.Messages.Response(SUCCESS,
+                response = HTTP.Response(SUCCESS,
                     Dict("Content-Type"=>"application/vnd.fdsn.mseed"), body=data)
                 out = SeisRequests.parse_data_response(T, request, response, server)
                 @test out isa Vector{Seis.Trace{T, Vector{T}, Seis.Geographic{T}}}

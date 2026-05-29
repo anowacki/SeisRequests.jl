@@ -66,16 +66,16 @@ import StationXML
 
     @testset "_check_content_type" begin
         @test SeisRequests._check_content_type(
-                HTTP.Messages.Response(200, Dict("Content-Type"=>"application/xml")),
+                HTTP.Response(200, Dict("Content-Type"=>"application/xml")),
                 "application/xml"
             ) === nothing
         @test SeisRequests._check_content_type(
-                HTTP.Messages.Response(200, Dict("Content-Type"=>"")),
+                HTTP.Response(200, Dict("Content-Type"=>"")),
                 "application/xml";
                 allowempty=true
             ) === nothing
         @test SeisRequests._check_content_type(
-                HTTP.Messages.Response(200, Dict("Content-Type"=>"application/xml; charset=utf-8")),
+                HTTP.Response(200, Dict("Content-Type"=>"application/xml; charset=utf-8")),
                 "application/xml"
             ) === nothing
         @test_logs(
@@ -84,7 +84,7 @@ import StationXML
                 "content type of response is \"text/xml\", not \"application/xml\" as expected"
             ),
             SeisRequests._check_content_type(
-                HTTP.Messages.Response(200, Dict("Content-Type"=>"text/xml")),
+                HTTP.Response(200, Dict("Content-Type"=>"text/xml")),
                 "application/xml"
             )
         )

@@ -11,7 +11,7 @@ import QuakeML
     @testset "parse_events" begin
         @testset "No response" begin
             request = FDSNEvent()
-            response = HTTP.Messages.Response(request.nodata)
+            response = HTTP.Response(request.nodata)
             @test SeisRequests.parse_event_response(Float64, request,
                 response, server) == []
 
@@ -25,14 +25,14 @@ import QuakeML
                 ) SeisRequests.parse_event_response(
                             Float64, request, response, server) == [])
             request = FDSNEvent(nodata=404)
-            response = HTTP.Messages.Response(request.nodata)
+            response = HTTP.Response(request.nodata)
             @test SeisRequests.parse_event_response(Float64, request, response,
                 server) == []
         end
 
         @testset "'Success' but no data" begin
             request = FDSNEvent()
-            response = HTTP.Messages.Response(SUCCESS)
+            response = HTTP.Response(SUCCESS)
             @test_throws ErrorException SeisRequests.parse_event_response(Float64,
                 request, response, server)
         end
@@ -43,9 +43,9 @@ import QuakeML
                 body = "usp000jv5f|2012-11-07T16:35:46.930|13.988|-91.895|24|us|us|us|usp000jv5f|mww|7.4|us|offshore Guatemala|earthquake\n"
 
                 @testset "Wrong" begin
-                    response_correct = HTTP.Messages.Response(SUCCESS,
+                    response_correct = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"text/plain"), body=body)
-                    response_type_wrong = HTTP.Messages.Response(SUCCESS,
+                    response_type_wrong = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"WRONG"), body=body)
                     @test (@test_logs (:warn, "content type of response is \"WRONG\", " *
                              "not \"text/plain\" as expected"
@@ -56,9 +56,9 @@ import QuakeML
                 end
 
                 @testset "Empty" begin
-                    response_correct = HTTP.Messages.Response(SUCCESS,
+                    response_correct = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"text/plain"), body=body)
-                    response_type_empty = HTTP.Messages.Response(SUCCESS,
+                    response_type_empty = HTTP.Response(SUCCESS,
                         Dict(), body=body)
                     @test SeisRequests.parse_event_response(Float64,
                         request, response_type_empty, server) ==
@@ -93,9 +93,9 @@ import QuakeML
                     </quakeml>
                     """
                 @testset "Wrong" begin
-                    response_correct = HTTP.Messages.Response(SUCCESS,
+                    response_correct = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"application/xml"), body=body)
-                    response_type_wrong = HTTP.Messages.Response(SUCCESS,
+                    response_type_wrong = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"WRONG"), body=body)
                     @test (@test_logs (:warn, "content type of response is \"WRONG\", " *
                                                  "not \"application/xml\" as expected"
@@ -105,9 +105,9 @@ import QuakeML
                             response_correct, server)
                 end
                 @testset "Empty" begin
-                    response_correct = HTTP.Messages.Response(SUCCESS,
+                    response_correct = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"application/xml"), body=body)
-                    response_type_empty = HTTP.Messages.Response(SUCCESS, 
+                    response_type_empty = HTTP.Response(SUCCESS, 
                         Dict(), body=body)
                     @test SeisRequests.parse_event_response(
                             Float64, request, response_type_empty, server) ==
@@ -124,7 +124,7 @@ import QuakeML
                 usp000juhz|2012-10-28T03:04:08.820|52.788|-132.101|14|us|us|us|usp000juhz|mww|7.8|us|Haida Gwaii, Canada|earthquake
                 """
             @testset "Eltype $T" for T in (Float32, Float64)
-                response = HTTP.Messages.Response(SUCCESS, body)
+                response = HTTP.Response(SUCCESS, body)
                 out = SeisRequests.parse_event_response(T, request, response, server)
                 @test out isa Vector{Seis.GeogEvent{T}}
                 @test length(out) == 2
@@ -287,7 +287,7 @@ import QuakeML
                 </q:quakeml>
                 """
             @testset "Eltype $T" for T in (Float32, Float64)
-                response = HTTP.Messages.Response(SUCCESS, body)
+                response = HTTP.Response(SUCCESS, body)
                 out = SeisRequests.parse_event_response(T, request, response, server)
                 @test out isa Vector{Seis.GeogEvent{T}}
                 @test length(out) == 2
