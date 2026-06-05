@@ -12,7 +12,7 @@ using Dates: DateTime, Minute, Second
     @testset "parse_data_response" begin
         @testset "No response" begin
             request = FDSNDataSelect()
-            response = HTTP.Response(request.nodata)
+            response = HTTP.Response(request.nodata, "")
             @test SeisRequests.parse_data_response(Float64, request, response, server) == []
 
             @testset "Eltype $T" for T in (Float32, Float64)
@@ -20,19 +20,19 @@ using Dates: DateTime, Minute, Second
                     Vector{Seis.Trace{T, Vector{T}, Seis.Geographic{T}}}
             end
 
-            response.body = [1]
+            response = HTTP.Response(request.nodata, [0x01])
             @test (@test_logs (:warn, "unexpected data in response reporting no data"
                 ) SeisRequests.parse_data_response(Float64, request, response, server) == [])
 
             request = FDSNDataSelect(nodata=404)
-            response = HTTP.Response(request.nodata)
+            response = HTTP.Response(request.nodata, "")
             @test SeisRequests.parse_data_response(Float64, request, response, server) == []
         end
     end
 
     @testset "'Success' but no data" begin
         request = FDSNDataSelect()
-        response = HTTP.Response(SUCCESS)
+        response = HTTP.Response(SUCCESS, "")
         @test_throws ErrorException SeisRequests.parse_data_response(Float64, request,
             response, server)
     end

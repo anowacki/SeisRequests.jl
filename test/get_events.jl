@@ -11,7 +11,7 @@ import QuakeML
     @testset "parse_events" begin
         @testset "No response" begin
             request = FDSNEvent()
-            response = HTTP.Response(request.nodata)
+            response = HTTP.Response(request.nodata, "")
             @test SeisRequests.parse_event_response(Float64, request,
                 response, server) == []
 
@@ -19,20 +19,20 @@ import QuakeML
                 @test SeisRequests.parse_event_response(T, request, response,
                     server) isa Vector{Seis.GeogEvent{T}}
             end
-            response.body = [1]
+            response = HTTP.Response(request.nodata, [0x01])
             @test (@test_logs (:warn,
                             "unexpected data in response reporting no data"
                 ) SeisRequests.parse_event_response(
                             Float64, request, response, server) == [])
             request = FDSNEvent(nodata=404)
-            response = HTTP.Response(request.nodata)
+            response = HTTP.Response(request.nodata, "")
             @test SeisRequests.parse_event_response(Float64, request, response,
                 server) == []
         end
 
         @testset "'Success' but no data" begin
             request = FDSNEvent()
-            response = HTTP.Response(SUCCESS)
+            response = HTTP.Response(SUCCESS, "")
             @test_throws ErrorException SeisRequests.parse_event_response(Float64,
                 request, response, server)
         end

@@ -35,7 +35,7 @@ end
     @testset "parse_station_response" begin
         @testset "No response" begin
             request = FDSNStation(nodata=204)
-            response = HTTP.Response(request.nodata)
+            response = HTTP.Response(request.nodata, "")
             @test SeisRequests.parse_station_response(Float64, request,
                 response, server) == []
 
@@ -43,19 +43,19 @@ end
                 @test SeisRequests.parse_station_response(T, request, response,
                     server) isa Vector{Seis.GeogStation{T}}
             end
-            response.body = [1]
+            response = HTTP.Response(request.nodata, [0x01])
             @test (@test_logs (:warn,
                             "unexpected data in response reporting no data") SeisRequests.parse_station_response(
                             Float64, request, response, server) == [])
             request = FDSNStation(nodata=404)
-            response = HTTP.Response(request.nodata)
+            response = HTTP.Response(request.nodata, "")
             @test SeisRequests.parse_station_response(Float64, request, response,
                 server) == []
         end
 
         @testset "'Success' but no data" begin
             request = FDSNStation()
-            response = HTTP.Response(SUCCESS)
+            response = HTTP.Response(SUCCESS, "")
             @test_throws ErrorException SeisRequests.parse_station_response(Float64,
                 request, response, server)
         end
