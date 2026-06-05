@@ -119,14 +119,21 @@ include("io.jl")
 """Default version string for all requests."""
 version_string(::SeisRequest) = "1"
 
+"Obtain the default server for a request"
+_default_server(r::T) where T = _default_server(T)
+_default_server(::Type{<:SeisRequest}) = DEFAULT_SERVER
+_default_server(::Type{FDSNEvent}) = DEFAULT_EVENT_SERVER
+
 """
-    request_uri(r::SeisRequest; server=$(DEFAULT_SERVER)) -> uri
+    request_uri(r::SeisRequest[; server]) -> uri
 
 Return a URI for the request `r`, which can then be obtained via HTTP GET.
 
 `server` can either be a URI or one of the available servers.  (See [`server_list`](@ref).)
+Without being specified, it will use the default for the particular
+request type.
 """
-function request_uri(r::SeisRequest; server=DEFAULT_SERVER)
+function request_uri(r::SeisRequest; server=_default_server(r))
     uri = base_uri(r, server=server) * "?"
     firstfield = true
     for f in fieldnames(typeof(r))
@@ -144,13 +151,13 @@ function request_uri(r::SeisRequest; server=DEFAULT_SERVER)
 end
 
 """
-    post_uri(rs::AbstractArray{SeisRequest}; server=$(DEFAULT_SERVER)) -> uri
+    post_uri(rs::AbstractArray{SeisRequest}; [server]) -> uri
 
 Return a URI for the requests `rs`, which can then be obtained via HTTP POST.
 
 `server` can either be a URI or one of the available servers.  (See [`server_list`](@ref).)
 """
-post_uri(r::SeisRequest; server=DEFAULT_SERVER) = base_uri(r, server=server)
+post_uri(r::SeisRequest; server=_default_server(r)) = base_uri(r, server=server)
 
 """
     base_uri(request::SeisRequest, server=$(DEFAULT_SERVER)) -> uri
@@ -160,7 +167,7 @@ Return the base URI for the `request`, which will look something like
 
 Note that the `query` part is included.
 """
-function base_uri(request::SeisRequest; server=DEFAULT_SERVER)
+function base_uri(request::SeisRequest; server=_default_server(request))
     server = server in keys(SERVERS) ? SERVERS[server] : server
     protocol = protocol_string(request)
     service = service_string(request)
@@ -191,12 +198,13 @@ See also: [`add_server!`](@ref)
 server_list() = collect(keys(SERVERS))
 
 """
-    get_request(r::SeisRequest; server=$(DEFAULT_SERVER), verbose=true) -> response::HTTP.Message.Response
+    get_request(r::SeisRequest; [server,] verbose=true) -> response::HTTP.Message.Response
 
 Return `response`, the result of requesting `r` via the HTTP GET command.  Optionally specify
 the server either by URI or one of the available servers.  (See [`server_list`](@ref).)
+By default, `server` will be picked automatically depending on the request type.
 """
-function get_request(r::SeisRequest; server=DEFAULT_SERVER, verbose=true)
+function get_request(r::SeisRequest; server=_default_server(r), verbose=true)
     uri = request_uri(r; server=server)
     # Mitigate against CRLF injection (CVE-2025-52479): https://nvd.nist.gov/vuln/detail/CVE-2025-52479
     _error_on_control_characters(uri)
@@ -211,7 +219,7 @@ function get_request(r::SeisRequest; server=DEFAULT_SERVER, verbose=true)
 end
 
 """
-    post_request(requests::AbstractArray{<:SeisRequest}; server=$(DEFAULT_SERVER), verbose=true) -> response::HTTP.Message.Response
+    post_request(requests::AbstractArray{<:SeisRequest}; [server,] verbose=true) -> response::HTTP.Message.Response
 
 Send a set of `requests` to `server` using the HTTP POST method, returning
 the `response`.
@@ -219,12 +227,12 @@ the `response`.
 This requires that all the options apart from channel, start time and
 end time are the same for all the `requests`.
 """
-function post_request(rs::AbstractArray{T};
-        server=DEFAULT_SERVER, verbose=true) where {T<:FDSNRequest}
+function post_request(rs::AbstractArray{T}; server=_default_server(T), verbose=true) where {T<:FDSNRequest}
     if !requests_can_be_posted(rs)
         throw(ArgumentError("all requests must be identical apart from their " *
             "channel, start time and end time"))
     end
+    server = something(server, _default_server(T))
     body = post_string(rs)
     uri = post_uri(first(rs); server=server)
     # Mitigate against CRLF injection (CVE-2025-52479): https://nvd.nist.gov/vuln/detail/CVE-2025-52479
