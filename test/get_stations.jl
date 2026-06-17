@@ -35,7 +35,7 @@ end
     @testset "parse_station_response" begin
         @testset "No response" begin
             request = FDSNStation(nodata=204)
-            response = HTTP.Messages.Response(request.nodata)
+            response = HTTP.Response(request.nodata, "")
             @test SeisRequests.parse_station_response(Float64, request,
                 response, server) == []
 
@@ -43,19 +43,19 @@ end
                 @test SeisRequests.parse_station_response(T, request, response,
                     server) isa Vector{Seis.GeogStation{T}}
             end
-            response.body = [1]
+            response = HTTP.Response(request.nodata, [0x01])
             @test (@test_logs (:warn,
                             "unexpected data in response reporting no data") SeisRequests.parse_station_response(
                             Float64, request, response, server) == [])
             request = FDSNStation(nodata=404)
-            response = HTTP.Messages.Response(request.nodata)
+            response = HTTP.Response(request.nodata, "")
             @test SeisRequests.parse_station_response(Float64, request, response,
                 server) == []
         end
 
         @testset "'Success' but no data" begin
             request = FDSNStation()
-            response = HTTP.Messages.Response(SUCCESS)
+            response = HTTP.Response(SUCCESS, "")
             @test_throws ErrorException SeisRequests.parse_station_response(Float64,
                 request, response, server)
         end
@@ -66,9 +66,9 @@ end
                 body = "AB|XXX|2000-01-01|3000-01-01|2\n"
 
                 @testset "Wrong" begin
-                    response_correct = HTTP.Messages.Response(SUCCESS,
+                    response_correct = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"text/plain"), body=body)
-                    response_type_wrong = HTTP.Messages.Response(SUCCESS,
+                    response_type_wrong = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"WRONG"), body=body)
                     @test (@test_logs (:warn, "content type of response is \"WRONG\", " *
                              "not \"text/plain\" as expected"
@@ -79,9 +79,9 @@ end
                 end
 
                 @testset "Empty" begin
-                    response_correct = HTTP.Messages.Response(SUCCESS,
+                    response_correct = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"text/plain"), body=body)
-                    response_type_empty = HTTP.Messages.Response(SUCCESS,
+                    response_type_empty = HTTP.Response(SUCCESS,
                         Dict(), body=body)
                     @test SeisRequests.parse_station_response(Float64,
                         request, response_type_empty, server) ==
@@ -99,9 +99,9 @@ end
                     </Network>
                     </FDSNStationXML>"""
                 @testset "Wrong" begin
-                    response_correct = HTTP.Messages.Response(SUCCESS,
+                    response_correct = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"application/xml"), body=body)
-                    response_type_wrong = HTTP.Messages.Response(SUCCESS,
+                    response_type_wrong = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"WRONG"), body=body)
                     @test_logs (:warn, "content type of response is \"WRONG\", " *
                             "not \"application/xml\" as expected"
@@ -111,9 +111,9 @@ end
                             response_correct, server)
                 end
                 @testset "Empty" begin
-                    response_correct = HTTP.Messages.Response(SUCCESS,
+                    response_correct = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"application/xml"), body=body)
-                    response_type_empty = HTTP.Messages.Response(SUCCESS, body)
+                    response_type_empty = HTTP.Response(SUCCESS, body)
                     @test SeisRequests.parse_station_response(
                             Float64, request, response_type_empty, server) ==
                         SeisRequests.parse_station_response(Float64, request,
@@ -134,7 +134,7 @@ end
                     BN|Network 2|3000-01-02T03:04:05.678||101
                     """
                 @testset "Eltype $T" for T in (Float32, Float64)
-                    response = HTTP.Messages.Response(SUCCESS,
+                    response = HTTP.Response(SUCCESS,
                         Dict("Content-Type"=>"text/plain"), body=body)
                     out = SeisRequests.parse_station_response(T, request, response,
                         server)
@@ -161,7 +161,7 @@ end
                     IU|ANMO|34.9459|-106.4572|1850.0|Albuquerque, New Mexico, USA|1995-07-14T00:00:00|
                     """
                 @testset "Eltype $T" for T in (Float32, Float64)
-                    response = HTTP.Messages.Response(SUCCESS, body)
+                    response = HTTP.Response(SUCCESS, body)
                     out = SeisRequests.parse_station_response(T, request, response,
                         server)
                     @test out isa Vector{Seis.GeogStation{T}}
@@ -185,7 +185,7 @@ end
                     IU|COLA|20|HNN|64.873599|-147.8616|200.0|0.0|0.0|0.0|Kinemetrics FBA-23 Low-GainSensor|53687.1|1.0|M/S**2|80.0|2005-09-28T22:00:00|
                     """
                 @testset "Eltype $T" for T in (Float32, Float64)
-                    response = HTTP.Messages.Response(SUCCESS, body)
+                    response = HTTP.Response(SUCCESS, body)
                     out = SeisRequests.parse_station_response(T, request, response,
                         server)
                     @test out isa Vector{Seis.GeogStation{T}}
@@ -239,7 +239,7 @@ end
                 sxml′ = deepcopy(sxml)
                 push!(sxml′.network, net)
                 @testset "Eltype $T" for T in (Float32, Float64)
-                    response = HTTP.Messages.Response(SUCCESS, Dict(),
+                    response = HTTP.Response(SUCCESS, Dict(),
                         body=string(StationXML.xmldoc(sxml′)))
                     out = SeisRequests.parse_station_response(T, request, response,
                         server)
@@ -281,7 +281,7 @@ end
                 push!(sxml′.network[1].station, deepcopy(sta))
                 append!(sxml′.network[1].station[1].channel, deepcopy([cha1, cha2]))
                 @testset "Eltype $T" for T in (Float32, Float64)
-                    response = HTTP.Messages.Response(SUCCESS, Dict(),
+                    response = HTTP.Response(SUCCESS, Dict(),
                         body=string(StationXML.xmldoc(sxml′)))
                     out = SeisRequests.parse_station_response(T, request, response,
                         server)

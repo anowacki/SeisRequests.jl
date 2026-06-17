@@ -1037,7 +1037,7 @@ If `allowempty` is `true` (the default) then empty messages do
 not throw.
 """
 function _check_content_type(response, expected; allowempty=true)
-    content_type = HTTP.Messages.header(response, "Content-Type")
+    content_type = HTTP.header(response, "Content-Type")
     allowempty && isempty(content_type) && return
     # Only warn on non-UTF-8 charsets
     content_type = replace(content_type, "; charset=utf-8"=>"")

@@ -47,11 +47,11 @@ using SeisRequests
             @test SeisRequests.protocol_string(req) == "fdsnws"
             @test SeisRequests.service_string(req) == "event"
             @test SeisRequests.request_uri(req) == 
-                "https://service.earthscope.org/fdsnws/event/1/query?" *
+                "http://earthquake.usgs.gov/fdsnws/event/1/query?" *
                 "starttime=2000-01-01T00:00:00&endtime=2000-01-02T00:00:00&" *
                 "latitude=15.0&longitude=45.0&maxradius=5.0&minmagnitude=4.0&" *
                 "nodata=204"
-            # Get request: will fail if IRISWS not working for some reason
+            # Get request: will fail if USGS not working for some reason
             response = get_request(req, verbose=false)
             @test response.status in keys(SeisRequests.STATUS_CODES)
         end
